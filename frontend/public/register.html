@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Mutanha</title>
+      <link rel="icon" href="favicon.ico" />
+
+    <link rel="stylesheet" href="../src/styles/index.css">
+  <link rel="stylesheet" href="../src/styles/style.css">
+
+  <script src="../src/js/script.js"></script>
+</head>
+<body class="bg-[#fcfaf8] min-h-screen">
+    <div class="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-[#1b130d]">
+                    Criar Conta
+                </h2>
+                <p class="mt-2 text-center text-sm text-[#9a6c4c]">
+                    Junte-se à comunidade Mutanha
+                </p>
+            </div>
+            <form class="mt-8 space-y-6" id="register-form">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div class="mb-4">
+                        <label for="username" class="block text-sm font-medium text-[#1b130d]">Nome de usuário *</label>
+                        <input id="username" name="username" type="text" required 
+                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                               placeholder="Digite seu nome de usuário">
+                    </div>
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-medium text-[#1b130d]">Email *</label>
+                        <input id="email" name="email" type="email" required 
+                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                               placeholder="Digite seu email">
+                    </div>
+                    <div class="mb-4">
+                        <label for="full_name" class="block text-sm font-medium text-[#1b130d]">Nome completo *</label>
+                        <input id="full_name" name="full_name" type="text" required 
+                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                               placeholder="Digite seu nome completo">
+                    </div>
+                    <div class="mb-4">
+                        <label for="phone" class="block text-sm font-medium text-[#1b130d]">Telefone</label>
+                        <input id="phone" name="phone" type="tel" 
+                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                               placeholder="Digite seu telefone">
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="block text-sm font-medium text-[#1b130d]">Senha *</label>
+                        <input id="password" name="password" type="password" required 
+                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                               placeholder="Digite sua senha">
+                    </div>
+                    <div class="mb-4">
+                        <label for="confirm_password" class="block text-sm font-medium text-[#1b130d]">Confirmar senha *</label>
+                        <input id="confirm_password" name="confirm_password" type="password" required 
+                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                               placeholder="Confirme sua senha">
+                    </div>
+                    <div class="mb-4">
+                        <label for="address" class="block text-sm font-medium text-[#1b130d]">Endereço</label>
+                        <textarea id="address" name="address" rows="3"
+                                  class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                                  placeholder="Digite seu endereço completo"></textarea>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-[#1b130d]">Cidade</label>
+                            <input id="city" name="city" type="text" 
+                                   class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                                   placeholder="Cidade">
+                        </div>
+                        <div>
+                            <label for="state" class="block text-sm font-medium text-[#1b130d]">Estado</label>
+                            <input id="state" name="state" type="text" 
+                                   class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                                   placeholder="Estado">
+                        </div>
+                        <div>
+                            <label for="zip_code" class="block text-sm font-medium text-[#1b130d]">CP</label>
+                            <input id="zip_code" name="zip_code" type="text" 
+                                   class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
+                                   placeholder="Codigo postal">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" 
+                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#250129] hover:bg-[#250129e4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#250129]">
+                        Criar Conta
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <a href="login.html" class="font-medium text-[#250129] hover:text-[#250129e4]">
+                        Já tem uma conta? Faça login
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            // Validação básica
+            if (data.password !== data.confirm_password) {
+                alert('As senhas não coincidem');
+                return;
+            }
+            
+            if (data.password.length < 6) {
+                alert('A senha deve ter pelo menos 6 caracteres');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: data.username,
+                        email: data.email,
+                        password: data.password,
+                        full_name: data.full_name,
+                        phone: data.phone,
+                        address: data.address,
+                        city: data.city,
+                        state: data.state,
+                        zip_code: data.zip_code
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Salvar token
+                    localStorage.setItem('userToken', result.token);
+                    localStorage.setItem('userData', JSON.stringify(result.user));
+                    
+                    alert('Conta criada com sucesso!');
+                    window.location.href = 'index.html';
+                } else {
+                    alert(result.error || 'Erro ao criar conta');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao conectar com o servidor');
+            }
+        });
+    </script>
+</body>
+</html> 
