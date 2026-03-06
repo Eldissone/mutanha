@@ -1,642 +1,833 @@
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
+const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
+const IS_PUBLIC_PAGE = window.location.pathname.includes('/public/');
 
-// Carregar dados quando a página carregar
+let userToken = localStorage.getItem('userToken');
+let userData = parseSafeJson(localStorage.getItem('userData'));
+let cartItems = [];
+let allProducts = [];
+let currentProductIndex = 0;
+let currentRating = 0;
+let activeReviewId = null;
+let activeCartOverlay = null;
+
+let reviews = [
+  {
+    id: 1,
+    user: {
+      name: 'Sofia Carvalho',
+      email: 'sofia@email.com',
+      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAI2ud4dn_HmZ4i34PyQUwh5jcsw4Z8oJBOsmO6Zrb9jtGhfd31tHMBos9XbQDhPsK5ntoPua3GlW31w-DGp4otP4pq9i3AP3dTmca3Io5PexmvxCixXW9Q2g539lmJzUGfTrLWIsKFg-Q3pPzRZOlbKMbAIN3iiWFdYB5g9oY5IJB03bK4LVMFn5ypSWf726iP5LDqXKrh4Q6wpq4IY5zNSFf00ulTSao9ZUUtWl6CqdCU9m0Lmz1PO-2aXBlyfIQV77WdbSKbsfo'
+    },
+    rating: 5,
+    comment: 'Adorei a qualidade das pecas. Vestem muito bem e sao confortaveis.',
+    category: 'qualidade',
+    product: null,
+    date: '2 meses atras',
+    helpful: 12,
+    notHelpful: 2
+  },
+  {
+    id: 2,
+    user: {
+      name: 'Olivia Bennett',
+      email: 'olivia@email.com',
+      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBzf8fAYZhix9tcl2-Ie1qrdzjFfziEkiAPID-HNyKwfESLRxdEXs_9VuHavdeC8w8BMmpO9mYUWQL0_bwpJXTB5Fu0TYA-q1kAtGqW2w7uxNP8sT8v5yRqXZPyb7WO8WXFcvxgK8anbRkXGn_t5tD_2czNCTQe2qCBbqznu6IBOkGrb4NQ3gPt7nm9X29CqcWF-pIN0Iq_rPCIFzyUrBPjLb3EEw8YKbHtydRmrvwOO3qt6QjcADMNA_cYwFcWml-n1D7gNjQI5dk'
+    },
+    rating: 4,
+    comment: 'Boa experiencia geral. Entrega dentro do prazo e bom acabamento.',
+    category: 'geral',
+    product: null,
+    date: '3 meses atras',
+    helpful: 8,
+    notHelpful: 1
+  },
+  {
+    id: 3,
+    user: {
+      name: 'Ava Harper',
+      email: 'ava@email.com',
+      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDc-D3HJ9IJa6DtajGi6FtaVAcOLvVRFyL3xlicK56oI1BD289gDaeAoXGltA-y83dA5sgSmo01stBhuYMZta7Pv7-8m02-M_-Xcvothqa5QX8A4kgX9Du2F3GzHz8KwsZvvTdFvqaavhgWDaEAlyNlFx7E4rrK_Y0qIol_0rkmOKuIe6iZrRUZ18OhndEorDtglOMv7R-LrIpmlU2Txr1hvdszNVHDBoQ93d36D8brVFIdfpW7TK6OeqMeDOHDHAi064V7zCPHXr0'
+    },
+    rating: 5,
+    comment: 'Atendimento excelente e produtos de alta qualidade.',
+    category: 'atendimento',
+    product: null,
+    date: '4 meses atras',
+    helpful: 15,
+    notHelpful: 0
+  }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
-    loadUserActions();
+  syncSessionFromStorage();
+  setupHeroSlider();
+  setupArrivalsTabs();
+  loadUserActions();
+
+  if (isUserLoggedIn()) {
+    loadCart();
+  }
+
+  setupReviewForm();
+
+  if (document.getElementById('reviews-container')) {
     loadReviews();
+  }
 
-    if (isUserLoggedIn()) {
-        loadCart();
-        setupReviewForm();
+  if (document.getElementById('featured-products') || document.getElementById('new-products')) {
+    initializeProducts();
+  }
+
+  window.addEventListener('click', (event) => {
+    const modal = event.target;
+    if (!modal || !modal.id || !modal.id.toLowerCase().endsWith('modal')) return;
+    if (modal.classList.contains('hidden')) return;
+    if (event.target === modal) {
+      closeModal(modal.id);
     }
-
-    initializeProducts(); // Agora carrega os produtos em lote sem repetir
+  });
 });
 
-// Configurações globais
-const API_BASE_URL = 'http://localhost:3000/api';
-let userToken = localStorage.getItem('userToken');
-let userData = JSON.parse(localStorage.getItem('userData') || 'null');
-let cartItems = [];
+function setupHeroSlider() {
+  const heroImage = document.querySelector('.mix-hero-bg');
+  const heroKicker = document.querySelector('.mix-kicker');
+  const heroTitle = document.querySelector('.mix-hero-content h1');
+  const heroCta = document.querySelector('.mix-cta');
+  const prevButton = document.querySelector('.mix-hero-arrow.mix-left');
+  const nextButton = document.querySelector('.mix-hero-arrow.mix-right');
 
-// Função para verificar se usuário está logado
+  if (!heroImage || !heroKicker || !heroTitle || !heroCta || !prevButton || !nextButton) return;
+
+  const slides = [
+    {
+      image: 'src/IMG/IMG2.jpg',
+      kicker: 'URBAN EDGE',
+      title: 'Jackets for the Modern Man',
+      ctaLabel: 'Discovery Now',
+      ctaHref: 'public/roupas.html'
+    },
+    {
+      image: 'src/IMG/IMG3.jpg',
+      kicker: 'NEW SEASON',
+      title: 'Contemporary Looks for Everyday Style',
+      ctaLabel: 'Shop Collection',
+      ctaHref: 'public/roupas.html'
+    },
+    {
+      image: 'src/IMG/m.jpg',
+      kicker: 'ACCESSORY DROP',
+      title: 'Statement Pieces for City Nights',
+      ctaLabel: 'View Accessories',
+      ctaHref: 'public/acess.html'
+    }
+  ];
+
+  let activeIndex = 0;
+
+  const renderSlide = () => {
+    const slide = slides[activeIndex];
+    heroImage.src = slide.image;
+    heroKicker.textContent = slide.kicker;
+    heroTitle.textContent = slide.title;
+    heroCta.textContent = slide.ctaLabel;
+    heroCta.href = slide.ctaHref;
+  };
+
+  prevButton.addEventListener('click', () => {
+    activeIndex = (activeIndex - 1 + slides.length) % slides.length;
+    renderSlide();
+  });
+
+  nextButton.addEventListener('click', () => {
+    activeIndex = (activeIndex + 1) % slides.length;
+    renderSlide();
+  });
+
+  renderSlide();
+}
+
+function setupArrivalsTabs() {
+  const tabs = document.querySelectorAll('.mix-tabs button');
+  if (!tabs.length) return;
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((button) => button.classList.remove('is-active'));
+      tab.classList.add('is-active');
+    });
+  });
+}
+
+function parseSafeJson(value) {
+  try {
+    return value ? JSON.parse(value) : null;
+  } catch {
+    return null;
+  }
+}
+
+function syncSessionFromStorage() {
+  userToken = localStorage.getItem('userToken');
+  userData = parseSafeJson(localStorage.getItem('userData'));
+}
+
 function isUserLoggedIn() {
-    return userToken && userData;
+  return Boolean(userToken && userData);
 }
 
-// Função para carregar botões de usuário
+function goToLogin() {
+  window.location.href = IS_PUBLIC_PAGE ? 'login.html' : 'public/login.html';
+}
+
+function goToRegister() {
+  window.location.href = IS_PUBLIC_PAGE ? 'register.html' : 'public/register.html';
+}
+
+function goToHome() {
+  window.location.href = IS_PUBLIC_PAGE ? '../index.html' : 'index.html';
+}
+
+function goToAdminPanel() {
+  window.location.href = IS_PUBLIC_PAGE ? '../admin/index.html' : 'admin/index.html';
+}
+
+function getImageUrl(imagePath) {
+  if (!imagePath) return `${API_ORIGIN}/uploads/default-product.jpg`;
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+  return `${API_ORIGIN}${imagePath}`;
+}
+
+function showToast(message, type = 'info') {
+  const existingToast = document.querySelector('.notification-toast');
+  if (existingToast) existingToast.remove();
+
+  const toast = document.createElement('div');
+  toast.className = `notification-toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3200);
+}
+
 function loadUserActions() {
-    const container = document.getElementById('user-actions');
+  const container = document.getElementById('user-actions') || document.getElementById('userActions');
+  if (!container) return;
 
-    if (isUserLoggedIn()) {
-        // Verificar se o usuário é admin
-        const isAdmin = userData && userData.role === 'admin';
+  if (isUserLoggedIn()) {
+    const isAdmin = userData.role === 'admin';
+    const adminButton = isAdmin
+      ? `
+        <button
+          class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#250129] hover:text-white transition-colors"
+          onclick="goToAdminPanel()">
+          <span class="truncate">Admin</span>
+        </button>
+      `
+      : '';
 
-        let adminButton = '';
-        if (isAdmin) {
-            adminButton = `
-            <button
-              class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#250129] hover:text-white transition-colors"
-              onclick="window.location.href='../admin/index.html'">
-              <span class="truncate">Admin</span>
-            </button>
-          `;
-        }
+    container.innerHTML = `
+      ${adminButton}
+      <button
+        class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#f3ece7] text-[#1b130d] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5 hover:bg-[#250129] hover:text-white transition-colors"
+        onclick="showCart()">
+        <div class="text-[#1b130d] hover:text-white" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
+            <path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,160H40V56H216V200ZM176,88a48,48,0,0,1-96,0,8,8,0,0,1,16,0,32,32,0,0,0,64,0,8,8,0,0,1,16,0Z"></path>
+          </svg>
+        </div>
+        <span id="cart-count" class="bg-[#250129] text-white rounded-full px-2 py-1 text-xs">0</span>
+      </button>
+      <button
+        class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#250129] hover:text-white transition-colors"
+        onclick="logout()">
+        <span class="truncate">Sair</span>
+      </button>
+    `;
 
-        container.innerHTML = `
-          ${adminButton}
-          <button
-            class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 bg-[#f3ece7] text-[#1b130d] gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5 hover:bg-[#250129] hover:text-white transition-colors"
-            onclick="showCart()">
-            <div class="text-[#1b130d] hover:text-white" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                viewBox="0 0 256 256">
-                <path
-                  d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,160H40V56H216V200ZM176,88a48,48,0,0,1-96,0,8,8,0,0,1,16,0,32,32,0,0,0,64,0,8,8,0,0,1,16,0Z">
-                </path>
-              </svg>
-            </div>
-            <span id="cart-count" class="bg-[#250129] text-white rounded-full px-2 py-1 text-xs">0</span>
-          </button>
-          <button
-            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#250129] hover:text-white transition-colors"
-            onclick="logout()">
-            <span class="truncate">Sair</span>
-          </button>
-        `;
-    } else {
-        container.innerHTML = `
-          <button
-            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#250129] hover:text-white transition-colors"
-            onclick="window.location.href='login.html'">
-            <span class="truncate">Entrar</span>
-          </button>
-          <button
-            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#250129] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#250129e4] transition-colors"
-            onclick="window.location.href='register.html'">
-            <span class="truncate">Registrar</span>
-          </button>
-          <button
-            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#250129] hover:text-white transition-colors"
-            onclick="window.location.href='../admin/login.html'">
-            <span class="truncate">Admin</span>
-          </button>
-        `;
-    }
+    updateCartCount();
+    return;
+  }
+
+  container.innerHTML = `
+    <button
+      class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#250129] hover:text-white transition-colors"
+      onclick="goToLogin()">
+      <span class="truncate">Entrar</span>
+    </button>
+    <button
+      class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#250129] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#250129e4] transition-colors"
+      onclick="goToRegister()">
+      <span class="truncate">Registrar</span>
+    </button>
+  `;
 }
 
-// Função para fazer logout
 function logout() {
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('userData');
-    userToken = null;
-    userData = null;
-    cartItems = [];
-    loadUserActions();
-    loadFeaturedProducts();
+  localStorage.removeItem('userToken');
+  localStorage.removeItem('userData');
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('adminLoggedIn');
+  userToken = null;
+  userData = null;
+  cartItems = [];
+  loadUserActions();
+  updateCartCount();
+  closeCartOverlay();
+  showToast('Sessao terminada com sucesso', 'success');
 }
 
-// Função para adicionar produto ao carrinho
 async function addToCart(productId, quantity = 1) {
-    if (!isUserLoggedIn()) {
-        alert('Faça login para adicionar produtos ao carrinho');
-        window.location.href = 'login.html';
-        return;
+  if (!isUserLoggedIn()) {
+    showToast('Faca login para adicionar produtos ao carrinho', 'warning');
+    goToLogin();
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/cart/add`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`
+      },
+      body: JSON.stringify({
+        product_id: productId,
+        quantity
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      showToast(result.error || 'Erro ao adicionar ao carrinho', 'error');
+      return;
     }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/cart/add`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${userToken}`
-            },
-            body: JSON.stringify({
-                product_id: productId,
-                quantity: quantity
-            })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            alert('Produto adicionado ao carrinho!');
-            loadCart();
-        } else {
-            alert(result.error || 'Erro ao adicionar ao carrinho');
-        }
-    } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao conectar com o servidor');
-    }
+    await loadCart();
+    showToast('Produto adicionado ao carrinho', 'success');
+  } catch (error) {
+    console.error('Erro ao adicionar ao carrinho:', error);
+    showToast('Erro ao conectar com o servidor', 'error');
+  }
 }
 
-// Função para carregar carrinho
 async function loadCart() {
-    if (!isUserLoggedIn()) return;
+  if (!isUserLoggedIn()) return;
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/cart`, {
-            headers: {
-                'Authorization': `Bearer ${userToken}`
-            }
-        });
+  try {
+    const response = await fetch(`${API_BASE_URL}/cart`, {
+      headers: {
+        Authorization: `Bearer ${userToken}`
+      }
+    });
 
-        if (response.ok) {
-            cartItems = await response.json();
-            updateCartCount();
-        }
-    } catch (error) {
-        console.error('Erro ao carregar carrinho:', error);
+    if (!response.ok) {
+      cartItems = [];
+      updateCartCount();
+      return;
     }
+
+    cartItems = await response.json();
+    updateCartCount();
+  } catch (error) {
+    console.error('Erro ao carregar carrinho:', error);
+  }
 }
 
-// Função para atualizar contador do carrinho
 function updateCartCount() {
-    const cartCount = document.getElementById('cart-count');
-    if (cartCount) {
-        const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-        cartCount.textContent = totalItems;
-    }
+  const count = cartItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const badge = document.getElementById('cart-count') || document.getElementById('cartCount');
+  if (badge) {
+    badge.textContent = String(count);
+  }
 }
 
-// Função para mostrar carrinho
 function showCart() {
-    if (!isUserLoggedIn()) {
-        alert('Faça login para ver o carrinho');
-        return;
-    }
+  if (!isUserLoggedIn()) {
+    showToast('Faca login para ver o carrinho', 'warning');
+    return;
+  }
 
-    if (cartItems.length === 0) {
-        alert('Carrinho vazio');
-        return;
-    }
+  if (cartItems.length === 0) {
+    showToast('Carrinho vazio', 'info');
+    return;
+  }
 
-    const total = cartItems.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
+  const total = cartItems.reduce((sum, item) => sum + Number(item.total_price || 0), 0);
 
-    const cartContent = cartItems.map(item => `
-        <div class="flex justify-between items-center p-2 border-b">
-          <div>
-            <p class="font-medium">${item.name}</p>
-            <p class="text-sm text-gray-600">Qtd: ${item.quantity}</p>
-          </div>
-          <p class="font-bold">AOA ${parseFloat(item.total_price).toLocaleString()}</p>
+  const cartContent = cartItems.map((item) => `
+    <div class="flex justify-between items-center p-2 border-b">
+      <div>
+        <p class="font-medium">${item.name}</p>
+        <p class="text-sm text-gray-600">Qtd: ${item.quantity}</p>
+      </div>
+      <p class="font-bold">AOA ${Number(item.total_price).toLocaleString()}</p>
+    </div>
+  `).join('');
+
+  closeCartOverlay();
+
+  activeCartOverlay = document.createElement('div');
+  activeCartOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+  activeCartOverlay.innerHTML = `
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold">Carrinho de Compras</h3>
+        <button onclick="closeCartOverlay()" class="text-gray-500 hover:text-gray-700">&times;</button>
+      </div>
+      <div class="max-h-64 overflow-y-auto">${cartContent}</div>
+      <div class="border-t pt-4 mt-4">
+        <div class="flex justify-between items-center mb-4">
+          <span class="font-bold">Total:</span>
+          <span class="font-bold">AOA ${total.toLocaleString()}</span>
         </div>
-      `).join('');
+        <button onclick="checkout()" class="w-full bg-[#250129] text-white py-2 px-4 rounded hover:bg-[#250129e4]">
+          Finalizar Compra
+        </button>
+      </div>
+    </div>
+  `;
 
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    modal.innerHTML = `
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-bold">Carrinho de Compras</h3>
-            <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">✕</button>
-          </div>
-          <div class="max-h-64 overflow-y-auto">
-            ${cartContent}
-          </div>
-          <div class="border-t pt-4 mt-4">
-            <div class="flex justify-between items-center mb-4">
-              <span class="font-bold">Total:</span>
-              <span class="font-bold">AOA ${total.toLocaleString()}</span>
-            </div>
-            <button onclick="checkout()" class="w-full bg-[#250129] text-white py-2 px-4 rounded hover:bg-[#250129e4]">
-              Feichar Carrinho
-            </button>
-          </div>
-        </div>
-      `;
-
-    document.body.appendChild(modal);
+  document.body.appendChild(activeCartOverlay);
 }
 
-// Função para finalizar compra
-async function checkout() {
-    if (!isUserLoggedIn()) {
-        alert('Faça login para finalizar a compra');
-        return;
-    }
-
-    if (cartItems.length === 0) {
-        alert('Carrinho vazio');
-        return;
-    }
-
-    // Mostrar modal de checkout
-    document.getElementById('checkout-modal').classList.add('active');
+function closeCartOverlay() {
+  if (!activeCartOverlay) return;
+  activeCartOverlay.remove();
+  activeCartOverlay = null;
 }
 
-// Função para processar o pedido
+function checkout() {
+  if (!isUserLoggedIn()) {
+    showToast('Faca login para finalizar a compra', 'warning');
+    return;
+  }
+
+  if (cartItems.length === 0) {
+    showToast('Carrinho vazio', 'info');
+    return;
+  }
+
+  closeCartOverlay();
+  const checkoutModal = document.getElementById('checkout-modal');
+  if (!checkoutModal) {
+    showToast('Continue a compra na pagina inicial', 'info');
+    goToHome();
+    return;
+  }
+
+  showModal('checkout-modal');
+}
+
 async function processOrder() {
-    const paymentMethod = document.getElementById('payment-method').value;
-    const shippingAddress = document.getElementById('shipping-address').value;
-    const notes = document.getElementById('order-notes').value;
+  if (!isUserLoggedIn()) {
+    showToast('Faca login para finalizar a compra', 'warning');
+    return;
+  }
 
-    if (!paymentMethod) {
-        alert('Selecione um método de pagamento');
-        return;
+  const paymentMethodEl = document.getElementById('payment-method');
+  const shippingAddressEl = document.getElementById('shipping-address');
+  const notesEl = document.getElementById('order-notes');
+
+  const paymentMethod = paymentMethodEl ? paymentMethodEl.value.trim() : '';
+  const shippingAddress = shippingAddressEl ? shippingAddressEl.value.trim() : '';
+  const notes = notesEl ? notesEl.value.trim() : '';
+
+  if (!paymentMethod) {
+    showToast('Selecione um metodo de pagamento', 'warning');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/orders/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`
+      },
+      body: JSON.stringify({
+        payment_method: paymentMethod,
+        shipping_address: shippingAddress,
+        notes
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      showToast(result.error || 'Erro ao criar pedido', 'error');
+      return;
     }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/orders/create`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${userToken}`
-            },
-            body: JSON.stringify({
-                payment_method: paymentMethod,
-                shipping_address: shippingAddress,
-                notes: notes
-            })
-        });
+    closeModal('checkout-modal');
+    showModal('success-modal');
 
-        const result = await response.json();
+    const orderNumber = document.getElementById('order-number');
+    const orderTotal = document.getElementById('order-total');
 
-        if (response.ok) {
-            // Fechar modal
-            document.getElementById('checkout-modal').classList.remove('active');
+    if (orderNumber) orderNumber.textContent = result.order_id;
+    if (orderTotal) orderTotal.textContent = `AOA ${Number(result.total || 0).toLocaleString()}`;
 
-            // Mostrar modal de sucesso
-            document.getElementById('success-modal').classList.add('active');
-            document.getElementById('order-number').textContent = result.order_id;
-            document.getElementById('order-total').textContent = `AOA ${result.total.toLocaleString()}`;
-
-            // Limpar carrinho
-            cartItems = [];
-            updateCartCount();
-            document.querySelector('.fixed').remove();
-        } else {
-            alert(result.error || 'Erro ao criar pedido');
-        }
-    } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao conectar com o servidor');
-    }
+    cartItems = [];
+    updateCartCount();
+    closeCartOverlay();
+    showToast('Pedido criado com sucesso', 'success');
+  } catch (error) {
+    console.error('Erro ao criar pedido:', error);
+    showToast('Erro ao conectar com o servidor', 'error');
+  }
 }
 
-let allProducts = [];
-let currentIndex = 0;
-
-// Função para buscar todos os produtos apenas uma vez
 async function fetchAllProducts() {
-    try {
-        const response = await fetch('http://localhost:3000/api/public/products');
-        if (!response.ok) {
-            throw new Error('Erro ao carregar produtos');
-        }
-        allProducts = await response.json();
-    } catch (error) {
-        console.error('Erro ao buscar produtos:', error);
+  try {
+    let response = await fetch(`${API_BASE_URL}/public/all-products`);
+
+    if (!response.ok) {
+      response = await fetch(`${API_BASE_URL}/public/products`);
     }
+
+    if (!response.ok) {
+      throw new Error('Erro ao carregar produtos');
+    }
+
+    allProducts = await response.json();
+  } catch (error) {
+    console.error('Erro ao buscar produtos:', error);
+    allProducts = [];
+  }
 }
 
-// Função para carregar um "chunk" de produtos em um container sem repetir
 function loadProducts(containerId, limit = 4) {
-    const container = document.getElementById(containerId);
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
-    if (currentIndex >= allProducts.length) {
-        container.innerHTML = `
-      <div class="flex items-center justify-center h-32 text-[#9a6c4c]">
+  if (allProducts.length === 0) {
+    container.innerHTML = `
+      <div class="mix-empty-card">
+        <p>Nenhum produto disponivel no momento.</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (currentProductIndex >= allProducts.length) {
+    container.innerHTML = `
+      <div class="mix-empty-card">
         <p>Sem mais produtos para exibir.</p>
       </div>
     `;
-        return;
-    }
+    return;
+  }
 
-    const productChunk = allProducts.slice(currentIndex, currentIndex + limit);
-    currentIndex += limit;
+  const productChunk = allProducts.slice(currentProductIndex, currentProductIndex + limit);
+  currentProductIndex += limit;
 
-    if (productChunk.length === 0) {
-        container.innerHTML = `
-      <div class="flex items-center justify-center h-32 text-[#9a6c4c]">
-        <p>Nenhum produto disponível no momento</p>
-      </div>
-    `;
-        return;
-    }
-
-    container.innerHTML = productChunk.map(product => `
-    <div class="flex h-full flex-1 flex-col gap-4 rounded-lg min-w-50 cursor-pointer hover:scale-102 transition-transform">
-      <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl flex flex-col"
-        style='background-image: url("http://localhost:3000${product.image}");'>
-      </div>
-      <div class="product p-4">
-        <p class="text-[#1b130d] text-base font-medium leading-normal">${product.name}</p>
-        <p class="text-[#9a6c4c] text-sm font-normal leading-normal">${product.description || 'Descrição não disponível'}</p>
-        <p class="text-[#250129] text-sm font-bold mt-2">AOA ${parseFloat(product.price).toLocaleString()}</p>
+  container.innerHTML = productChunk.map((product) => `
+    <article class="mix-product-card">
+      <a href="${IS_PUBLIC_PAGE ? 'roupas.html' : 'public/roupas.html'}" class="mix-product-image" style='background-image: url("${getImageUrl(product.image)}");' aria-label="Ver produto ${product.name}"></a>
+      <p class="mix-product-brand">${(product.category || 'Mutanha').toUpperCase()}</p>
+      <h3 class="mix-product-name">${product.name}</h3>
+      <p class="mix-product-price">AOA ${Number(product.price || 0).toLocaleString()}</p>
+      <div>
         ${isUserLoggedIn() ? `
-          <button onclick="addToCart(${product.id})" class="mt-2 bg-[#250129] text-white px-3 py-1 rounded text-sm hover:bg-[#250129e4]">
-            Adicionar ao Carrinho
+          <button onclick="addToCart(${product.id})" class="mix-product-btn">
+            Adicionar ao carrinho
           </button>
-        ` : ''}
+        ` : `
+          <button onclick="goToLogin()" class="mix-product-btn">
+            Entrar para comprar
+          </button>
+        `}
+      </div>
+    </article>
+  `).join('');
+}
+
+async function initializeProducts() {
+  await fetchAllProducts();
+  currentProductIndex = 0;
+  loadProducts('featured-products');
+  loadProducts('new-products');
+}
+
+function loadReviews() {
+  const container = document.getElementById('reviews-container');
+  if (!container) return;
+
+  container.innerHTML = reviews.map((review) => `
+    <div class="flex flex-col gap-3 bg-[#fcfaf8]">
+      <div class="flex items-center gap-3">
+        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style='background-image: url("${review.user.avatar}");'></div>
+        <div class="flex-1">
+          <p class="text-[#1b130d] text-base font-medium leading-normal">${review.user.name}</p>
+          <p class="text-[#9a6c4c] text-sm font-normal leading-normal">${review.date}</p>
+        </div>
+        <div class="flex gap-1">
+          <button onclick="showReactionModal(${review.id})" class="text-[#9a6c4c] hover:text-[#250129] transition-colors" aria-label="Reagir">&#10084;</button>
+          <button onclick="showShareModal(${review.id})" class="text-[#9a6c4c] hover:text-[#250129] transition-colors" aria-label="Compartilhar">&#10148;</button>
+        </div>
+      </div>
+      <div class="flex gap-0.5">${generateStars(review.rating)}</div>
+      <p class="text-[#1b130d] text-base font-normal leading-normal">"${review.comment}"</p>
+      <div class="flex gap-9 text-[#9a6c4c]">
+        <button onclick="reactToReview(${review.id}, 'helpful')" class="flex items-center gap-2 hover:text-[#250129] transition-colors">
+          <span aria-hidden="true">&#128077;</span>
+          <span>${review.helpful}</span>
+        </button>
+        <button onclick="reactToReview(${review.id}, 'not-helpful')" class="flex items-center gap-2 hover:text-[#250129] transition-colors">
+          <span aria-hidden="true">&#128078;</span>
+          <span>${review.notHelpful}</span>
+        </button>
       </div>
     </div>
   `).join('');
 }
 
-// Função principal que inicia tudo
-async function initializeProducts() {
-    await fetchAllProducts();
-    loadProducts('featured-products'); // Carrega primeiros 6 produtos
-    loadProducts('new-products');      // Carrega próximos 6 sem repetir
-}
-
-// ===== FUNÇÕES DE AVALIAÇÃO =====
-
-// Variáveis globais para avaliações
-let currentRating = 0;
-let reviews = [
-    {
-        id: 1,
-        user: {
-            name: 'Sofia Carvalho',
-            email: 'sofia@email.com',
-            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAI2ud4dn_HmZ4i34PyQUwh5jcsw4Z8oJBOsmO6Zrb9jtGhfd31tHMBos9XbQDhPsK5ntoPua3GlW31w-DGp4otP4pq9i3AP3dTmca3Io5PexmvxCixXW9Q2g539lmJzUGfTrLWIsKFg-Q3pPzRZOlbKMbAIN3iiWFdYB5g9oY5IJB03bK4LVMFn5ypSWf726iP5LDqXKrh4Q6wpq4IY5zNSFf00ulTSao9ZUUtWl6CqdCU9m0Lmz1PO-2aXBlyfIQV77WdbSKbsfo'
-        },
-        rating: 5,
-        comment: 'Adorei as leggings que comprei na Melfitness! A qualidade é incrível e elas vestem perfeitamente. Me sinto muito confiante usando-as na academia',
-        category: 'qualidade',
-        product: null,
-        date: '2 meses atrás',
-        helpful: 12,
-        notHelpful: 2
-    },
-    {
-        id: 2,
-        user: {
-            name: 'Olivia Bennett',
-            email: 'olivia@email.com',
-            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBzf8fAYZhix9tcl2-Ie1qrdzjFfziEkiAPID-HNyKwfESLRxdEXs_9VuHavdeC8w8BMmpO9mYUWQL0_bwpJXTB5Fu0TYA-q1kAtGqW2w7uxNP8sT8v5yRqXZPyb7WO8WXFcvxgK8anbRkXGn_t5tD_2czNCTQe2qCBbqznu6IBOkGrb4NQ3gPt7nm9X29CqcWF-pIN0Iq_rPCIFzyUrBPjLb3EEw8YKbHtydRmrvwOO3qt6QjcADMNA_cYwFcWml-n1D7gNjQI5dk'
-        },
-        rating: 4,
-        comment: 'A roupa é muito confortável e oferece excelente aderência. Estou feliz com a minha compra, mas gostaria que viesse em mais cores',
-        category: 'qualidade',
-        product: null,
-        date: '3 meses atrás',
-        helpful: 8,
-        notHelpful: 1
-    },
-    {
-        id: 3,
-        user: {
-            name: 'Ava Harper',
-            email: 'ava@email.com',
-            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDc-D3HJ9IJa6DtajGi6FtaVAcOLvVRFyL3xlicK56oI1BD289gDaeAoXGltA-y83dA5sgSmo01stBhuYMZta7Pv7-8m02-M_-Xcvothqa5QX8A4kgX9Du2F3GzHz8KwsZvvTdFvqaavhgWDaEAlyNlFx7E4rrK_Y0qIol_0rkmOKuIe6iZrRUZ18OhndEorDtglOMv7R-LrIpmlU2Txr1hvdszNVHDBoQ93d36D8brVFIdfpW7TK6OeqMeDOHDHAi064V7zCPHXr0'
-        },
-        rating: 5,
-        comment: 'Excelente atendimento e produtos de alta qualidade. Recomendo fortemente!',
-        category: 'atendimento',
-        product: null,
-        date: '4 meses atrás',
-        helpful: 15,
-        notHelpful: 0
-    }
-];
-
-// Carregar avaliações
-function loadReviews() {
-    const container = document.getElementById('reviews-container');
-    if (!container) return;
-
-    container.innerHTML = reviews.map(review => `
-        <div class="flex flex-col gap-3 bg-[#fcfaf8]">
-          <div class="flex items-center gap-3">
-            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-              style='background-image: url("${review.user.avatar}");'>
-            </div>
-            <div class="flex-1">
-              <p class="text-[#1b130d] text-base font-medium leading-normal">${review.user.name}</p>
-              <p class="text-[#9a6c4c] text-sm font-normal leading-normal">${review.date}</p>
-            </div>
-            <div class="flex gap-1">
-              <button onclick="showReactionModal(${review.id})" class="text-[#9a6c4c] hover:text-[#250129] transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
-                </svg>
-              </button>
-              <button onclick="showShareModal(${review.id})" class="text-[#9a6c4c] hover:text-[#250129] transition-colors">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z"></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="flex gap-0.5">
-            ${generateStars(review.rating)}
-          </div>
-          <p class="text-[#1b130d] text-base font-normal leading-normal">
-            "${review.comment}"
-          </p>
-          <div class="flex gap-9 text-[#9a6c4c]">
-            <button onclick="reactToReview(${review.id}, 'helpful')" class="flex items-center gap-2 hover:text-[#250129] transition-colors">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
-              </svg>
-              <span>${review.helpful}</span>
-            </button>
-            <button onclick="reactToReview(${review.id}, 'not-helpful')" class="flex items-center gap-2 hover:text-[#250129] transition-colors">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
-              </svg>
-              <span>${review.notHelpful}</span>
-            </button>
-          </div>
-        </div>
-      `).join('');
-}
-
-// Gerar estrelas
 function generateStars(rating) {
-    let stars = '';
-    for (let i = 1; i <= 5; i++) {
-        if (i <= rating) {
-            stars += `
-            <div class="text-[#250129]" data-icon="Star" data-size="20px" data-weight="fill">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
-                <path d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z"></path>
-              </svg>
-            </div>
-          `;
-        } else {
-            stars += `
-            <div class="text-[#d7bead]" data-icon="Star" data-size="20px" data-weight="regular">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor" viewBox="0 0 256 256">
-                <path d="M239.2,97.29a16,16,0,0,0-13.81-11L166,81.17,142.72,25.81h0a15.95,15.95,0,0,0-29.44,0L90.07,81.17,30.61,86.32a16,16,0,0,0-9.11,28.06L66.61,153.8,53.09,212.34a16,16,0,0,0,23.84,17.34l51-31,51.11,31a16,16,0,0,0,23.84-17.34l-13.51-58.6,45.1-39.36A16,16,0,0,0,239.2,97.29Zm-15.22,5-45.1,39.36a16,16,0,0,0-5.08,15.71L187.35,216v0l-51.07-31a15.9,15.9,0,0,0-16.54,0l-51,31h0L82.2,157.4a16,16,0,0,0-5.08-15.71L32,102.35a.37.37,0,0,1,0-.09l59.44-5.14a16,16,0,0,0,13.35-9.75L128,32.08l23.2,55.29a16,16,0,0,0,13.35,9.75L224,102.26S224,102.32,224,102.33Z"></path>
-              </svg>
-            </div>
-          `;
-        }
-    }
-    return stars;
+  let stars = '';
+  for (let i = 1; i <= 5; i += 1) {
+    stars += `<span class="text-xl ${i <= rating ? 'text-[#250129]' : 'text-[#d7bead]'}">&#9733;</span>`;
+  }
+  return stars;
 }
 
-// Configurar formulário de avaliação
 function setupReviewForm() {
-    const form = document.getElementById('reviewForm');
-    const starButtons = document.querySelectorAll('#starRating button');
+  const form = document.getElementById('reviewForm');
+  if (!form || form.dataset.bound === 'true') return;
 
-    // Configurar estrelas
-    starButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const rating = parseInt(this.dataset.rating);
-            setRating(rating);
-        });
+  const starButtons = document.querySelectorAll('#starRating button');
+
+  starButtons.forEach((button) => {
+    button.addEventListener('click', function setReviewRating() {
+      const rating = Number.parseInt(this.dataset.rating, 10);
+      setRating(rating);
     });
+  });
 
-    // Configurar envio do formulário
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        submitReview();
-    });
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    submitReview();
+  });
 
-    // Carregar produtos no select
-    loadProductsForReview();
+  form.dataset.bound = 'true';
+  loadProductsForReview();
 }
 
-// Definir avaliação por estrelas
 function setRating(rating) {
-    currentRating = rating;
-    const starButtons = document.querySelectorAll('#starRating button');
+  currentRating = rating;
+  const starButtons = document.querySelectorAll('#starRating button');
 
-    starButtons.forEach((button, index) => {
-        const starRating = index + 1;
-        if (starRating <= rating) {
-            button.classList.remove('text-[#d7bead]');
-            button.classList.add('text-[#250129]');
-        } else {
-            button.classList.remove('text-[#250129]');
-            button.classList.add('text-[#d7bead]');
-        }
-    });
+  starButtons.forEach((button, index) => {
+    const buttonRating = index + 1;
+    if (buttonRating <= rating) {
+      button.classList.remove('text-[#d7bead]');
+      button.classList.add('text-[#250129]');
+      return;
+    }
+
+    button.classList.remove('text-[#250129]');
+    button.classList.add('text-[#d7bead]');
+  });
 }
 
-// Carregar produtos para o select
 async function loadProductsForReview() {
-    try {
-        const response = await fetch('http://localhost:3000/api/public/products');
-        if (response.ok) {
-            const products = await response.json();
-            const select = document.getElementById('reviewProduct');
+  const select = document.getElementById('reviewProduct');
+  if (!select) return;
 
-            products.forEach(product => {
-                const option = document.createElement('option');
-                option.value = product.id;
-                option.textContent = product.name;
-                select.appendChild(option);
-            });
-        }
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
+  try {
+    let response = await fetch(`${API_BASE_URL}/public/all-products`);
+
+    if (!response.ok) {
+      response = await fetch(`${API_BASE_URL}/public/products`);
     }
+
+    if (!response.ok) return;
+
+    const products = await response.json();
+
+    while (select.options.length > 1) {
+      select.remove(1);
+    }
+
+    products.forEach((product) => {
+      const option = document.createElement('option');
+      option.value = product.id;
+      option.textContent = product.name;
+      select.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Erro ao carregar produtos para avaliacao:', error);
+  }
 }
 
-// Enviar avaliação
-async function submitReview() {
-    if (currentRating === 0) {
-        alert('Por favor, selecione uma avaliação');
-        return;
-    }
+function submitReview() {
+  if (currentRating === 0) {
+    showToast('Selecione uma avaliacao', 'warning');
+    return;
+  }
 
-    const comment = document.getElementById('reviewComment').value.trim();
-    if (!comment) {
-        alert('Por favor, escreva um comentário');
-        return;
-    }
+  const commentInput = document.getElementById('reviewComment');
+  const productInput = document.getElementById('reviewProduct');
+  const categoryInput = document.getElementById('reviewCategory');
 
-    const productId = document.getElementById('reviewProduct').value;
-    const category = document.getElementById('reviewCategory').value;
+  const comment = commentInput ? commentInput.value.trim() : '';
+  if (!comment) {
+    showToast('Escreva um comentario', 'warning');
+    return;
+  }
 
-    // Simular envio da avaliação
-    const newReview = {
-        id: reviews.length + 1,
-        user: {
-            name: localStorage.getItem('userName') || 'Usuário',
-            email: localStorage.getItem('userEmail') || 'usuario@email.com',
-            avatar: 'https://via.placeholder.com/40x40/ef8a42/ffffff?text=U'
-        },
-        rating: currentRating,
-        comment: comment,
-        category: category,
-        product: productId || null,
-        date: 'Agora',
-        helpful: 0,
-        notHelpful: 0
-    };
+  const displayName = userData?.full_name || userData?.username || 'Usuario';
+  const email = userData?.email || 'usuario@email.com';
+  const firstLetter = displayName.charAt(0).toUpperCase() || 'U';
 
-    reviews.unshift(newReview);
-    loadReviews();
+  const newReview = {
+    id: reviews.length + 1,
+    user: {
+      name: displayName,
+      email,
+      avatar: userData?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(firstLetter)}&background=ef8a42&color=fff`
+    },
+    rating: currentRating,
+    comment,
+    category: categoryInput ? categoryInput.value : 'geral',
+    product: productInput && productInput.value ? productInput.value : null,
+    date: 'Agora',
+    helpful: 0,
+    notHelpful: 0
+  };
 
-    // Limpar formulário
-    document.getElementById('reviewComment').value = '';
-    document.getElementById('reviewProduct').value = '';
-    document.getElementById('reviewCategory').value = 'geral';
-    setRating(0);
+  reviews.unshift(newReview);
+  loadReviews();
 
-    closeModal('reviewModal');
-    alert('Avaliação publicada com sucesso!');
+  if (commentInput) commentInput.value = '';
+  if (productInput) productInput.value = '';
+  if (categoryInput) categoryInput.value = 'geral';
+
+  setRating(0);
+  closeModal('reviewModal');
+  showToast('Avaliacao publicada com sucesso', 'success');
 }
 
-// Mostrar modal de reação
 function showReactionModal(reviewId) {
-    // Por enquanto, apenas mostrar um alert
-    alert('Funcionalidade de reação será implementada em breve!');
+  activeReviewId = reviewId;
+  showModal('reactionModal');
 }
 
-// Mostrar modal de compartilhamento
 function showShareModal(reviewId) {
-    document.getElementById('shareLink').value = `https://melfitness.com.ao/reviews/${reviewId}`;
-    showModal('shareModal');
+  const linkInput = document.getElementById('shareLink');
+  if (linkInput) {
+    linkInput.value = `${window.location.origin}/reviews/${reviewId}`;
+  }
+  showModal('shareModal');
 }
 
-// Reagir à avaliação
-function reactToReview(reviewId, reaction) {
-    const review = reviews.find(r => r.id === reviewId);
-    if (review) {
-        if (reaction === 'helpful') {
-            review.helpful++;
-        } else {
-            review.notHelpful++;
-        }
-        loadReviews();
-    }
+function reactToReview(reviewIdOrReaction, reactionMaybe) {
+  const hasExplicitId = typeof reactionMaybe === 'string';
+  const reviewId = hasExplicitId ? reviewIdOrReaction : activeReviewId;
+  const reaction = hasExplicitId ? reactionMaybe : reviewIdOrReaction;
+
+  const review = reviews.find((item) => item.id === reviewId);
+  if (!review) {
+    showToast('Avaliacao nao encontrada', 'error');
+    return;
+  }
+
+  if (reaction === 'helpful') {
+    review.helpful += 1;
+  } else {
+    review.notHelpful += 1;
+  }
+
+  loadReviews();
+  closeModal('reactionModal');
+  showToast('Obrigado pelo feedback', 'success');
 }
 
-// Copiar link de compartilhamento
 function copyShareLink() {
-    const linkInput = document.getElementById('shareLink');
-    linkInput.select();
-    document.execCommand('copy');
-    alert('Link copiado para a área de transferência!');
+  const linkInput = document.getElementById('shareLink');
+  if (!linkInput) return;
+
+  const link = linkInput.value;
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link)
+      .then(() => showToast('Link copiado para a area de transferencia', 'success'))
+      .catch(() => showToast('Nao foi possivel copiar o link', 'error'));
+    return;
+  }
+
+  linkInput.select();
+  document.execCommand('copy');
+  showToast('Link copiado para a area de transferencia', 'success');
 }
 
-// Compartilhar nas redes sociais
 function shareToSocial(platform) {
-    const link = document.getElementById('shareLink').value;
-    const text = 'Confira esta avaliação da Melfitness!';
+  const linkInput = document.getElementById('shareLink');
+  if (!linkInput) return;
 
-    let url = '';
-    switch (platform) {
-        case 'facebook':
-            url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
-            break;
-        case 'twitter':
-            url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`;
-            break;
-        case 'whatsapp':
-            url = `https://wa.me/?text=${encodeURIComponent(text + ' ' + link)}`;
-            break;
-    }
+  const link = linkInput.value;
+  const text = 'Confira esta avaliacao da Mutanha!';
+  let url = '';
 
-    if (url) {
-        window.open(url, '_blank');
-    }
+  if (platform === 'facebook') {
+    url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+  }
+
+  if (platform === 'twitter') {
+    url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`;
+  }
+
+  if (platform === 'whatsapp') {
+    url = `https://wa.me/?text=${encodeURIComponent(`${text} ${link}`)}`;
+  }
+
+  if (url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
 }
 
-// Funções de modal
+function showProfileModal() {
+  if (!isUserLoggedIn()) {
+    showToast('Faca login para acessar seu perfil', 'warning');
+    return;
+  }
+
+  const avatarDiv = document.getElementById('profile-avatar');
+  const nameDiv = document.getElementById('profile-name');
+  const emailDiv = document.getElementById('profile-email');
+
+  if (avatarDiv) {
+    if (userData.avatar) {
+      avatarDiv.style.backgroundImage = `url('${userData.avatar}')`;
+      avatarDiv.textContent = '';
+    } else {
+      avatarDiv.style.backgroundImage = '';
+      avatarDiv.textContent = (userData.full_name || userData.username || 'U').charAt(0).toUpperCase();
+    }
+  }
+
+  if (nameDiv) nameDiv.textContent = userData.full_name || userData.username || 'Usuario';
+  if (emailDiv) emailDiv.textContent = userData.email || '';
+
+  showModal('profileModal');
+}
+
+function openSettings() {
+  showToast('Configuracoes do perfil em breve', 'info');
+}
+
 function showModal(modalId) {
-    document.getElementById(modalId).classList.remove('hidden');
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.classList.remove('hidden');
 }
 
 function closeModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.classList.remove('active');
 }

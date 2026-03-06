@@ -393,7 +393,8 @@
 
   <script>
     // Configurações globais
-    const API_BASE_URL = 'http://localhost:3000/api';
+    const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
+    const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
     let userToken = localStorage.getItem('userToken');
     let userData = JSON.parse(localStorage.getItem('userData') || 'null');
     let cartItems = [];
@@ -461,11 +462,6 @@
             class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#ef8a42] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#d67a3a] transition-colors"
             onclick="window.location.href='register.html'">
             <span class="truncate">Registrar</span>
-          </button>
-          <button
-            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#f3ece7] text-[#1b130d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#ef8a42] hover:text-white transition-colors"
-            onclick="window.location.href='../admin/login.html'">
-            <span class="truncate">Admin</span>
           </button>
         `;
       }
@@ -664,7 +660,7 @@
     // Função para carregar produtos em destaque
     async function loadFeaturedProducts() {
       try {
-        const response = await fetch('http://localhost:3000/api/public/products');
+        const response = await fetch(`${API_BASE_URL}/public/products`);
         if (!response.ok) {
           throw new Error('Erro ao carregar produtos');
         }
@@ -684,7 +680,7 @@
         container.innerHTML = products.map(product => `
           <div class="flex h-full flex-1 flex-col gap-4 rounded-lg min-w-60 cursor-pointer hover:scale-105 transition-transform">
             <div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-xl flex flex-col"
-              style='background-image: url("http://localhost:3000${product.image}");'>
+              style='background-image: url("${API_ORIGIN}${product.image}");'>
             </div>
             <div>
               <p class="text-[#1b130d] text-base font-medium leading-normal">${product.name}</p>
@@ -893,7 +889,7 @@
     // Carregar produtos para o select
     async function loadProductsForReview() {
       try {
-        const response = await fetch('http://localhost:3000/api/public/products');
+        const response = await fetch(`${API_BASE_URL}/public/products`);
         if (response.ok) {
           const products = await response.json();
           const select = document.getElementById('reviewProduct');

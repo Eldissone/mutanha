@@ -119,16 +119,16 @@
         <div class="login-card">
             <div class="login-header">
                 <h1>Mutanha Admin</h1>
-                <p>Faça login para acessar o painel de controle</p>
+                <p>Faca login para acessar o painel de controle</p>
             </div>
             
             <div class="error-message" id="error-message">
-                Credenciais inválidas. Tente novamente.
+                Credenciais invalidas. Tente novamente.
             </div>
             
             <form class="login-form" id="login-form">
                 <div class="form-group">
-                    <label for="username">Usuário</label>
+                    <label for="username">Usuario</label>
                     <input type="text" id="username" name="username" class="form-input" required>
                 </div>
                 
@@ -143,34 +143,30 @@
             </form>
             
             <div class="back-to-site">
-                <a href="../public/index.html">← Voltar ao site</a>
+                <a href="../index.html"><- Voltar ao site</a>
             </div>
         </div>
     </div>
 
     <script>
+        const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
         const loginForm = document.getElementById('login-form');
         const errorMessage = document.getElementById('error-message');
         const loginBtn = document.getElementById('login-btn');
         
-        // Credenciais de demonstração
-        const validCredentials = {
-            username: 'admin',
-            password: 'admin123'
-        };
-        
+        // Envio do formulario de login
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // Desabilita o botão durante o processo
+            // Desabilita o botao durante o processo
             loginBtn.disabled = true;
             loginBtn.textContent = 'Entrando...';
             
             try {
-                const response = await fetch('http://localhost:3000/api/login', {
+                const response = await fetch(`${API_BASE_URL}/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -204,10 +200,14 @@
             }
         });
         
-        // Verifica se já está logado
-        if (localStorage.getItem('adminLoggedIn') === 'true') {
+        // Verifica se ja esta logado
+        if (
+            localStorage.getItem('adminLoggedIn') === 'true' &&
+            localStorage.getItem('authToken')
+        ) {
             window.location.href = 'index.html';
         }
     </script>
 </body>
 </html> 
+

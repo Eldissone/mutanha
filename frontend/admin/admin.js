@@ -1,11 +1,33 @@
 // Configuração da API
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
+const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
 let authToken = localStorage.getItem('authToken');
 
 // Dados mockados para demonstração (serão substituídos pela API)
 let products = [];
 let orders = [];
 let customers = [];
+
+function getImageUrl(imagePath) {
+    if (!imagePath) return `${API_ORIGIN}/uploads/default-product.jpg`;
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+    return `${API_ORIGIN}${imagePath}`;
+}
+
+function clearAdminSession() {
+    localStorage.removeItem('adminLoggedIn');
+    localStorage.removeItem('authToken');
+    authToken = null;
+}
+
+function handleUnauthorizedStatus(status) {
+    if (status === 401 || status === 403) {
+        clearAdminSession();
+        window.location.href = 'login.html';
+        return true;
+    }
+    return false;
+}
 
 // Elementos DOM
 const navLinks = document.querySelectorAll('.nav-link');
@@ -46,23 +68,39 @@ navLinks.forEach(link => {
 // Funções de API
 async function apiRequest(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+    };
+
+    if (!authToken) {
+        clearAdminSession();
+        window.location.href = 'login.html';
+        throw new Error('Sessao de administrador invalida');
+    }
+
     const config = {
+        ...options,
         headers: {
-            'Content-Type': 'application/json',
+            ...headers,
             'Authorization': `Bearer ${authToken}`
-        },
-        ...options
+        }
     };
 
     try {
         const response = await fetch(url, config);
         if (!response.ok) {
+            if (handleUnauthorizedStatus(response.status)) {
+                throw new Error('Sessao expirada');
+            }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return await response.json();
     } catch (error) {
         console.error('API Error:', error);
-        showNotification('Erro na comunicação com o servidor', 'error');
+        if (error.message !== 'Sessao expirada') {
+            showNotification('Erro na comunicacao com o servidor', 'error');
+        }
         throw error;
     }
 }
@@ -130,6 +168,9 @@ async function uploadImage(file) {
         });
 
         if (!response.ok) {
+            if (handleUnauthorizedStatus(response.status)) {
+                throw new Error('Sessao expirada');
+            }
             throw new Error('Erro no upload da imagem');
         }
 
@@ -137,7 +178,9 @@ async function uploadImage(file) {
         return result.imageUrl;
     } catch (error) {
         console.error('Erro no upload:', error);
-        showNotification('Erro ao fazer upload da imagem', 'error');
+        if (error.message !== 'Sessao expirada') {
+            showNotification('Erro ao fazer upload da imagem', 'error');
+        }
         throw error;
     }
 }
@@ -237,7 +280,7 @@ async function loadProducts() {
             const isActive = product.is_active !== false; // Considera ativo se is_active não for false
             row.innerHTML = `
                 <td>
-                    <img src="http://localhost:3000${product.image}" alt="${product.name}" class="product-image">
+                    <img src="${getImageUrl(product.image)}" alt="${product.name}" class="product-image">
                 </td>
                 <td>${product.name}</td>
                 <td>${product.category}</td>
@@ -359,7 +402,7 @@ function editProduct(id) {
         
         // Mostrar imagem atual
         const currentImage = document.getElementById('edit-product-current-image');
-        currentImage.src = `http://localhost:3000${product.image}`;
+        currentImage.src = getImageUrl(product.image);
         currentImage.style.display = 'block';
         
         // Abrir modal
@@ -474,24 +517,52 @@ function showNotification(message, type = 'info') {
 // Logout
 document.querySelector('.logout-btn').addEventListener('click', () => {
     if (confirm('Tem certeza que deseja sair?')) {
-        localStorage.removeItem('adminLoggedIn');
+        clearAdminSession();
         window.location.href = 'login.html';
     }
 });
 
 // Verificação de autenticação
-function checkAuth() {
-    if (localStorage.getItem('adminLoggedIn') !== 'true') {
+async function checkAuth() {
+    const isAdminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+    const storedToken = localStorage.getItem('authToken');
+
+    if (!isAdminLoggedIn || !storedToken) {
+        clearAdminSession();
         window.location.href = 'login.html';
         return false;
     }
-    return true;
+
+    authToken = storedToken;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+
+        if (response.ok) {
+            return true;
+        }
+
+        if (handleUnauthorizedStatus(response.status)) {
+            return false;
+        }
+
+        showNotification('Nao foi possivel validar a sessao', 'error');
+        return false;
+    } catch (error) {
+        console.error('Erro ao validar sessao:', error);
+        showNotification('Erro ao validar a sessao de administrador', 'error');
+        return false;
+    }
 }
 
 // Inicialização
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Verifica se está autenticado
-    if (!checkAuth()) return;
+    if (!await checkAuth()) return;
     
     // Carrega dados iniciais do dashboard
     loadPageData('dashboard');
@@ -515,3 +586,4 @@ function updateDashboardStats() {
         activeCustomers
     });
 } 
+

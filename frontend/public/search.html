@@ -5,12 +5,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#111827" />
-  <meta name="description" content="Mutanha - catalogo de roupas" />
-  <meta name="keywords" content="moda, roupas, mutanha" />
-  <meta property="og:title" content="Mutanha - Roupas" />
-  <meta property="og:description" content="Colecao de roupas com filtros, carrinho e compra rapida." />
+  <meta name="description" content="Mutanha - pesquisa de produtos" />
+  <meta name="keywords" content="pesquisa, produtos, mutanha" />
+  <meta property="og:title" content="Mutanha - Search" />
+  <meta property="og:description" content="Pesquisa rapida por nome, categoria e preco." />
   <meta property="og:type" content="website" />
-  <title>Mutanha - Roupas</title>
+  <title>Mutanha - Search</title>
   <link rel="icon" href="../favicon.ico" />
   <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
   <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
@@ -19,18 +19,18 @@
   <link rel="stylesheet" href="../src/styles/catalog-layout.css" />
 </head>
 
-<body class="cat-page" data-default-category="roupas" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
+<body class="cat-page" data-default-category="" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
   <main class="cat-shell">
-    <section class="cat-hero" aria-label="Colecao de roupas">
-      <img class="cat-hero-bg" src="../src/IMG/IMG3.jpg" alt="Colecao de roupas Mutanha" />
+    <section class="cat-hero" aria-label="Pesquisa de produtos">
+      <img class="cat-hero-bg" src="../src/IMG/m.jpg" alt="Pesquisa de produtos Mutanha" />
       <div class="cat-hero-shade" aria-hidden="true"></div>
 
       <header class="cat-header">
         <nav class="cat-nav" aria-label="Navegacao principal">
           <a href="../index.html">Home</a>
-          <a href="roupas.html" aria-current="page">Shop</a>
+          <a href="roupas.html">Shop</a>
           <a href="acess.html">Acessorios</a>
-          <a href="search.html">Search</a>
+          <a href="search.html" aria-current="page">Search</a>
           <a href="login.html">Conta</a>
         </nav>
 
@@ -43,28 +43,28 @@
                 d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z">
               </path>
             </svg>
-            <input id="searchInput" type="search" placeholder="Pesquisar produtos" autocomplete="off" />
+            <input id="searchInput" type="search" placeholder="Pesquisar por nome do produto" autocomplete="off" />
           </label>
           <div id="userActions" aria-live="polite"></div>
         </div>
       </header>
 
       <div class="cat-copy">
-        <p class="cat-kicker">URBAN LINE</p>
-        <h1>Roupas para estilo moderno</h1>
-        <p>Pecas em destaque com envio rapido e checkout simplificado.</p>
+        <p class="cat-kicker">SMART SEARCH</p>
+        <h1>Encontra produtos em segundos</h1>
+        <p>Escreve, filtra e compra sem sair desta pagina.</p>
       </div>
     </section>
 
     <section class="cat-main" aria-labelledby="catalog-title">
-      <h2 id="catalog-title">New Arrivals</h2>
+      <h2 id="catalog-title">Search Results</h2>
 
       <div class="cat-tabs" role="tablist" aria-label="Categorias">
-        <button type="button" data-tab-category="roupas" class="is-active">ROUPAS</button>
+        <button type="button" data-tab-category="" class="is-active">TODOS</button>
+        <button type="button" data-tab-category="roupas">ROUPAS</button>
         <button type="button" data-tab-category="calcados">CALCADOS</button>
         <button type="button" data-tab-category="acessorios">ACESSORIOS</button>
         <button type="button" data-tab-category="equipamentos">EQUIPAMENTOS</button>
-        <button type="button" data-tab-category="">TODOS</button>
       </div>
 
       <div class="cat-filter-row">

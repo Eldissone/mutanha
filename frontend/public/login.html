@@ -1,95 +1,147 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Mutanha</title>
-   <link rel="icon" href="favicon.ico" />
-
-    <link rel="stylesheet" href="../src/styles/index.css">
-  <link rel="stylesheet" href="../src/styles/style.css">
-
-  <script src="../src/js/script.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="description" content="Mutanha - entrar na conta" />
+  <title>Mutanha - Login</title>
+  <link rel="icon" href="../favicon.ico" />
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Noto+Sans:wght@400;700&family=Playfair+Display:wght@600;700" />
+  <link rel="stylesheet" href="../src/styles/style.css" />
+  <link rel="stylesheet" href="../src/styles/auth-layout.css" />
 </head>
-<body class="bg-[#fcfaf8] min-h-screen">
-    <div class="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-[#1b130d]">
-                    Entrar na sua conta
-                </h2>
-                <p class="mt-2 text-center text-sm text-[#9a6c4c]">
-                    Acesse sua conta Mutanha
-                </p>
-            </div>
-            <form class="mt-8 space-y-6" id="login-form">
-                <div class="rounded-md shadow-sm -space-y-px">
-                    <div class="mb-4">
-                        <label for="username" class="block text-sm font-medium text-[#1b130d]">Usuário ou Email</label>
-                        <input id="username" name="username" type="text" required 
-                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
-                               placeholder="Digite seu usuário ou email">
-                    </div>
-                    <div class="mb-4">
-                        <label for="password" class="block text-sm font-medium text-[#1b130d]">Senha</label>
-                        <input id="password" name="password" type="password" required 
-                               class="appearance-none rounded-md relative block w-full px-3 py-2 border border-[#f3ece7] placeholder-[#9a6c4c] text-[#1b130d] focus:outline-none focus:ring-[#250129] focus:border-[#250129] focus:z-10 sm:text-sm"
-                               placeholder="Digite sua senha">
-                    </div>
-                </div>
 
-                <div>
-                    <button type="submit" 
-                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#250129] hover:bg-[#250129e4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#250129]">
-                        Entrar
-                    </button>
-                </div>
-
-                <div class="text-center">
-                    <a href="register.html" class="font-medium text-[#250129] hover:text-[#250129e4]">
-                        Não tem uma conta? Registre-se
-                    </a>
-                </div>
-            </form>
+<body class="auth-page" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
+  <main class="auth-shell">
+    <section class="auth-hero" aria-label="Boas-vindas">
+      <div class="auth-hero-copy">
+        <a href="../index.html" class="auth-home-link">Voltar para Home</a>
+        <div>
+          <a href="../index.html" class="auth-brand">Mutanha</a>
+          <h1>Entra e continua a tua compra</h1>
+          <p>Acede ao carrinho, acompanha pedidos e navega pelas novidades.</p>
         </div>
-    </div>
+      </div>
+    </section>
 
-    <script>
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            
-            try {
-                const response = await fetch('http://localhost:3000/api/user/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username: data.username,
-                        password: data.password
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    // Salvar token
-                    localStorage.setItem('userToken', result.token);
-                    localStorage.setItem('userData', JSON.stringify(result.user));
-                    
-                    alert('Login realizado com sucesso!');
-                    window.location.href = 'index.html';
-                } else {
-                    alert(result.error || 'Erro no login');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao conectar com o servidor');
-            }
+    <section class="auth-form-wrap" aria-label="Formulario de login">
+      <p class="auth-kicker">AUTHENTICATION</p>
+      <h2>Entrar</h2>
+      <p class="auth-subtitle">Usa o teu email ou nome de utilizador.</p>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <label class="auth-field">
+          <span>Utilizador ou email</span>
+          <input id="username" name="username" type="text" required autocomplete="username" placeholder="ex: joao@email.com" />
+        </label>
+
+        <label class="auth-field">
+          <span>Senha</span>
+          <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Digite a sua senha" />
+        </label>
+
+        <p id="login-feedback" class="auth-feedback hidden" aria-live="polite"></p>
+
+        <button id="login-submit" type="submit" class="auth-submit">Entrar</button>
+
+        <p class="auth-switch">
+          Nao tens conta?
+          <a id="register-link" href="register.html">Criar conta</a>
+        </p>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
+    const loginForm = document.getElementById('login-form');
+    const submitButton = document.getElementById('login-submit');
+    const feedback = document.getElementById('login-feedback');
+    const registerLink = document.getElementById('register-link');
+
+    const params = new URLSearchParams(window.location.search);
+    const redirectParam = params.get('redirect');
+
+    if (redirectParam && registerLink) {
+      registerLink.href = `register.html?redirect=${encodeURIComponent(redirectParam)}`;
+    }
+
+    function getRedirectTarget() {
+      if (!redirectParam) return '../index.html';
+      if (redirectParam.startsWith('http://') || redirectParam.startsWith('https://')) {
+        return '../index.html';
+      }
+      return redirectParam;
+    }
+
+    function setFeedback(message, type = 'error') {
+      feedback.textContent = message;
+      feedback.classList.remove('hidden', 'error', 'success');
+      feedback.classList.add(type === 'success' ? 'success' : 'error');
+    }
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        setFeedback('Preencha utilizador/email e senha.');
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = 'A entrar...';
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/user/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
         });
-    </script>
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          setFeedback(result.error || 'Credenciais invalidas.');
+          return;
+        }
+
+        if (result.user?.role === 'admin') {
+          localStorage.setItem('authToken', result.token);
+          localStorage.setItem('adminLoggedIn', 'true');
+          localStorage.removeItem('userToken');
+          localStorage.removeItem('userData');
+          setFeedback('Login admin feito. A redirecionar...', 'success');
+          setTimeout(() => {
+            window.location.href = '../admin/index.html';
+          }, 500);
+          return;
+        }
+
+        localStorage.setItem('userToken', result.token);
+        localStorage.setItem('userData', JSON.stringify(result.user));
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('adminLoggedIn');
+
+        setFeedback('Login feito com sucesso. A redirecionar...', 'success');
+        setTimeout(() => {
+          window.location.href = getRedirectTarget();
+        }, 500);
+      } catch (error) {
+        console.error('Erro no login:', error);
+        setFeedback('Erro ao conectar com o servidor.');
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Entrar';
+      }
+    });
+  </script>
 </body>
-</html> 
+
+</html>

@@ -10,9 +10,30 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET nao definido. Configure a variavel de ambiente antes de iniciar o servidor.');
+}
+
+const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || corsOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error('Origem nao permitida pelo CORS'));
+    },
+    credentials: true
+};
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,7 +58,7 @@ const authenticateToken = (req, res, next) => {
         return res.status(401).json({ error: 'Token de acesso necessário' });
     }
 
-    jwt.verify(token, process.env.JWT_SECRET || 'mutanha-secret', (err, user) => {
+    jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
             return res.status(403).json({ error: 'Token inválido' });
         }
@@ -47,6 +68,16 @@ const authenticateToken = (req, res, next) => {
 };
 
 // Rotas de autenticação
+const authenticateUser = authenticateToken;
+
+const requireRole = (...allowedRoles) => (req, res, next) => {
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Sem permissao para acessar este recurso' });
+    }
+
+    next();
+};
+
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -77,7 +108,7 @@ app.post('/api/login', async (req, res) => {
                 username: user.username, 
                 role: user.role 
             },
-            process.env.JWT_SECRET || 'mutanha-secret',
+            JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -128,7 +159,7 @@ const upload = multer({
 });
 
 // Rota para upload de imagem
-app.post('/api/upload-image', authenticateToken, upload.single('image'), (req, res) => {
+app.post('/api/upload-image', authenticateToken, requireRole('admin'), upload.single('image'), (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
@@ -146,7 +177,7 @@ app.post('/api/upload-image', authenticateToken, upload.single('image'), (req, r
 });
 
 // Rotas de produtos
-app.get('/api/products', authenticateToken, async (req, res) => {
+app.get('/api/products', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const result = await pool.query(
             'SELECT * FROM products WHERE is_active = true ORDER BY created_at DESC'
@@ -220,7 +251,7 @@ app.post('/api/register', async (req, res) => {
                 username: result.rows[0].username, 
                 role: result.rows[0].role 
             },
-            process.env.JWT_SECRET || 'mutanha-secret',
+            JWT_SECRET,
             { expiresIn: '24h' }
         );
         
@@ -238,37 +269,48 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/user/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        
-        // Buscar usuário
-        const result = await pool.query(
-            'SELECT * FROM user_accounts WHERE (username = $1 OR email = $1) AND is_active = true',
+
+        let user = null;
+        let sourceTable = 'user_accounts';
+
+        const customerResult = await pool.query(
+            'SELECT id, username, email, full_name, role, password FROM user_accounts WHERE (username = $1 OR email = $1) AND is_active = true',
             [username]
         );
-        
-        if (result.rows.length === 0) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+
+        if (customerResult.rows.length > 0) {
+            user = customerResult.rows[0];
+        } else {
+            const adminResult = await pool.query(
+                'SELECT id, username, email, full_name, role, password FROM users WHERE username = $1 OR email = $1',
+                [username]
+            );
+
+            if (adminResult.rows.length === 0) {
+                return res.status(401).json({ error: 'Credenciais inválidas' });
+            }
+
+            user = adminResult.rows[0];
+            sourceTable = 'users';
         }
-        
-        const user = result.rows[0];
-        
-        // Verificar senha
+
         const isValidPassword = await bcrypt.compare(password, user.password);
-        
+
         if (!isValidPassword) {
             return res.status(401).json({ error: 'Credenciais inválidas' });
         }
-        
-        // Gerar token JWT
+
         const token = jwt.sign(
-            { 
+            {
                 id: user.id,
-                username: user.username, 
-                role: user.role 
+                username: user.username,
+                role: user.role,
+                source: sourceTable
             },
-            process.env.JWT_SECRET || 'mutanha-secret',
+            JWT_SECRET,
             { expiresIn: '24h' }
         );
-        
+
         res.json({
             success: true,
             token: token,
@@ -285,35 +327,27 @@ app.post('/api/user/login', async (req, res) => {
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
-
 // Middleware para autenticar usuários normais
-const authenticateUser = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    
-    if (!token) {
-        return res.status(401).json({ error: 'Token de acesso necessário' });
-    }
-    
-    jwt.verify(token, process.env.JWT_SECRET || 'mutanha-secret', (err, user) => {
-        if (err) {
-            return res.status(403).json({ error: 'Token inválido' });
-        }
-        req.user = user;
-        next();
-    });
-};
-
 // Rotas do carrinho
 app.post('/api/cart/add', authenticateUser, async (req, res) => {
     try {
         const { product_id, quantity = 1 } = req.body;
         const user_id = req.user.id;
+        const parsedProductId = Number.parseInt(product_id, 10);
+        const requestedQuantity = Number.parseInt(quantity, 10);
+
+        if (!Number.isInteger(parsedProductId) || parsedProductId <= 0) {
+            return res.status(400).json({ error: 'Produto invalido' });
+        }
+
+        if (!Number.isInteger(requestedQuantity) || requestedQuantity <= 0) {
+            return res.status(400).json({ error: 'Quantidade deve ser um numero inteiro maior que zero' });
+        }
         
         // Verificar se produto existe e tem estoque
         const productResult = await pool.query(
             'SELECT id, name, price, stock_quantity FROM products WHERE id = $1 AND is_active = true',
-            [product_id]
+            [parsedProductId]
         );
         
         if (productResult.rows.length === 0) {
@@ -322,7 +356,7 @@ app.post('/api/cart/add', authenticateUser, async (req, res) => {
         
         const product = productResult.rows[0];
         
-        if (product.stock_quantity < quantity) {
+        if (Number(product.stock_quantity) < requestedQuantity) {
             return res.status(400).json({ error: 'Quantidade solicitada não disponível em estoque' });
         }
         
@@ -346,20 +380,27 @@ app.post('/api/cart/add', authenticateUser, async (req, res) => {
         // Verificar se item já existe no carrinho
         const existingItem = await pool.query(
             'SELECT id, quantity FROM cart_items WHERE cart_id = $1 AND product_id = $2',
-            [cart_id, product_id]
+            [cart_id, parsedProductId]
         );
+
+        const existingQuantity = existingItem.rows.length > 0 ? Number.parseInt(existingItem.rows[0].quantity, 10) : 0;
+        const nextQuantity = existingQuantity + requestedQuantity;
+
+        if (Number(product.stock_quantity) < nextQuantity) {
+            return res.status(400).json({ error: 'Quantidade solicitada nao disponivel em estoque' });
+        }
         
         if (existingItem.rows.length > 0) {
             // Atualizar quantidade
             await pool.query(
                 'UPDATE cart_items SET quantity = quantity + $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-                [quantity, existingItem.rows[0].id]
+                [requestedQuantity, existingItem.rows[0].id]
             );
         } else {
             // Adicionar novo item
             await pool.query(
                 'INSERT INTO cart_items (cart_id, product_id, quantity) VALUES ($1, $2, $3)',
-                [cart_id, product_id, quantity]
+                [cart_id, parsedProductId, requestedQuantity]
             );
         }
         
@@ -462,17 +503,27 @@ app.delete('/api/cart/remove/:item_id', authenticateUser, async (req, res) => {
 });
 
 // Rota para finalizar pedido
+// Rota para finalizar pedido (transacional)
 app.post('/api/orders/create', authenticateUser, async (req, res) => {
+    const user_id = req.user.id;
+    const { payment_method, shipping_address, notes } = req.body;
+    const client = await pool.connect();
+
     try {
-        const user_id = req.user.id;
-        const { payment_method, shipping_address, notes } = req.body;
-        
-        console.log('Criando pedido para usuário:', user_id);
-        console.log('Dados do pedido:', { payment_method, shipping_address, notes });
-        
-        // Buscar carrinho do usuário
-        const cartResult = await pool.query(`
-            SELECT 
+        await client.query('BEGIN');
+
+        const userResult = await client.query(
+            'SELECT full_name, email, phone, address, city, state, zip_code FROM user_accounts WHERE id = $1',
+            [user_id]
+        );
+
+        if (userResult.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Usuario nao encontrado' });
+        }
+
+        const cartResult = await client.query(`
+            SELECT
                 ci.id,
                 ci.quantity,
                 p.id as product_id,
@@ -484,58 +535,55 @@ app.post('/api/orders/create', authenticateUser, async (req, res) => {
             JOIN cart_items ci ON sc.id = ci.cart_id
             JOIN products p ON ci.product_id = p.id
             WHERE sc.user_id = $1 AND p.is_active = true
+            FOR UPDATE OF p, ci
         `, [user_id]);
-        
-        console.log('Itens no carrinho:', cartResult.rows);
-        
+
         if (cartResult.rows.length === 0) {
+            await client.query('ROLLBACK');
             return res.status(400).json({ error: 'Carrinho vazio' });
         }
-        
-        // Calcular total
-        const total = cartResult.rows.reduce((sum, item) => sum + parseFloat(item.total_price), 0);
-        console.log('Total do pedido:', total);
-        
-        // Buscar dados do usuário
-        const userResult = await pool.query(
-            'SELECT full_name, email, phone, address, city, state, zip_code FROM user_accounts WHERE id = $1',
-            [user_id]
-        );
-        
+
+        for (const item of cartResult.rows) {
+            if (Number(item.stock_quantity) < Number(item.quantity)) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ error: `Estoque insuficiente para o produto ${item.name}` });
+            }
+        }
+
+        const total = cartResult.rows.reduce((sum, item) => sum + Number(item.total_price), 0);
         const user = userResult.rows[0];
-        console.log('Dados do usuário:', user);
-        
-        // Criar pedido
-        const orderResult = await pool.query(
+
+        const orderResult = await client.query(
             'INSERT INTO orders (customer_id, customer_name, customer_email, customer_phone, total_amount, payment_method, shipping_address, notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
             [user_id, user.full_name, user.email, user.phone, total, payment_method, shipping_address || user.address, notes]
         );
-        
+
         const order_id = orderResult.rows[0].id;
-        console.log('Pedido criado com ID:', order_id);
-        
-        // Criar itens do pedido
+
         for (const item of cartResult.rows) {
-            console.log('Criando item do pedido:', item);
-            await pool.query(
+            await client.query(
                 'INSERT INTO order_items (order_id, product_id, product_name, quantity, unit_price, total_price) VALUES ($1, $2, $3, $4, $5, $6)',
                 [order_id, item.product_id, item.name, item.quantity, item.price, item.total_price]
             );
-            
-            // Atualizar estoque
-            await pool.query(
-                'UPDATE products SET stock_quantity = stock_quantity - $1 WHERE id = $2',
+
+            const stockUpdateResult = await client.query(
+                'UPDATE products SET stock_quantity = stock_quantity - $1 WHERE id = $2 AND stock_quantity >= $1 RETURNING id',
                 [item.quantity, item.product_id]
             );
+
+            if (stockUpdateResult.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({ error: `Nao foi possivel reservar o estoque do produto ${item.name}` });
+            }
         }
-        
-        // Limpar carrinho
-        await pool.query(
+
+        await client.query(
             'DELETE FROM cart_items WHERE cart_id = (SELECT id FROM shopping_carts WHERE user_id = $1)',
             [user_id]
         );
-        
-        console.log('Pedido finalizado com sucesso');
+
+        await client.query('COMMIT');
+
         res.status(201).json({
             success: true,
             message: 'Pedido criado com sucesso',
@@ -543,12 +591,19 @@ app.post('/api/orders/create', authenticateUser, async (req, res) => {
             total: total
         });
     } catch (error) {
+        try {
+            await client.query('ROLLBACK');
+        } catch (rollbackError) {
+            console.error('Erro ao desfazer transacao:', rollbackError);
+        }
+
         console.error('Erro ao criar pedido:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
+    } finally {
+        client.release();
     }
 });
 
-// Rota para buscar pedidos do usuário
 app.get('/api/user/orders', authenticateUser, async (req, res) => {
     try {
         const user_id = req.user.id;
@@ -565,7 +620,7 @@ app.get('/api/user/orders', authenticateUser, async (req, res) => {
     }
 });
 
-app.post('/api/products', authenticateToken, async (req, res) => {
+app.post('/api/products', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const { name, description, category, price, stock_quantity, image } = req.body;
         
@@ -598,7 +653,7 @@ app.post('/api/products', authenticateToken, async (req, res) => {
     }
 });
 
-app.put('/api/products/:id', authenticateToken, async (req, res) => {
+app.put('/api/products/:id', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const { id } = req.params;
         const { name, description, category, price, stock_quantity, image, status } = req.body;
@@ -639,7 +694,7 @@ app.put('/api/products/:id', authenticateToken, async (req, res) => {
     }
 });
 
-app.delete('/api/products/:id', authenticateToken, async (req, res) => {
+app.delete('/api/products/:id', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -660,7 +715,7 @@ app.delete('/api/products/:id', authenticateToken, async (req, res) => {
 });
 
 // Rotas de pedidos
-app.get('/api/orders', authenticateToken, async (req, res) => {
+app.get('/api/orders', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const result = await pool.query(
             'SELECT * FROM orders ORDER BY created_at DESC'
@@ -672,7 +727,7 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('/api/orders', authenticateToken, async (req, res) => {
+app.post('/api/orders', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const { customer_name, customer_email, customer_phone, total_amount, payment_method, shipping_address, notes } = req.body;
         
@@ -688,7 +743,7 @@ app.post('/api/orders', authenticateToken, async (req, res) => {
     }
 });
 
-app.put('/api/orders/:id', authenticateToken, async (req, res) => {
+app.put('/api/orders/:id', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const { id } = req.params;
         const { status, payment_method, shipping_address, notes } = req.body;
@@ -709,7 +764,7 @@ app.put('/api/orders/:id', authenticateToken, async (req, res) => {
     }
 });
 
-app.delete('/api/orders/:id', authenticateToken, async (req, res) => {
+app.delete('/api/orders/:id', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -730,7 +785,7 @@ app.delete('/api/orders/:id', authenticateToken, async (req, res) => {
 });
 
 // Rotas de clientes (usuários normais)
-app.get('/api/customers', authenticateToken, async (req, res) => {
+app.get('/api/customers', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT 
@@ -760,7 +815,7 @@ app.get('/api/customers', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('/api/customers', authenticateToken, async (req, res) => {
+app.post('/api/customers', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const { username, email, password, full_name, phone, address, city, state, zip_code } = req.body;
         
@@ -779,7 +834,7 @@ app.post('/api/customers', authenticateToken, async (req, res) => {
     }
 });
 
-app.put('/api/customers/:id', authenticateToken, async (req, res) => {
+app.put('/api/customers/:id', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const { id } = req.params;
         const { username, email, full_name, phone, address, city, state, zip_code, is_active } = req.body;
@@ -800,7 +855,7 @@ app.put('/api/customers/:id', authenticateToken, async (req, res) => {
     }
 });
 
-app.delete('/api/customers/:id', authenticateToken, async (req, res) => {
+app.delete('/api/customers/:id', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -822,7 +877,7 @@ app.delete('/api/customers/:id', authenticateToken, async (req, res) => {
 });
 
 // Rota para estatísticas do dashboard
-app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
+app.get('/api/dashboard/stats', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const [productsResult, ordersResult, customersResult, salesResult] = await Promise.all([
             pool.query('SELECT COUNT(*) as total FROM products WHERE is_active = true'),
@@ -844,7 +899,7 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
 });
 
 // Rota para pedidos recentes
-app.get('/api/dashboard/recent-orders', authenticateToken, async (req, res) => {
+app.get('/api/dashboard/recent-orders', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const result = await pool.query(
             'SELECT * FROM orders ORDER BY created_at DESC LIMIT 5'
@@ -857,7 +912,7 @@ app.get('/api/dashboard/recent-orders', authenticateToken, async (req, res) => {
 });
 
 // Rota para produtos mais vendidos (simplificada por enquanto)
-app.get('/api/dashboard/top-products', authenticateToken, async (req, res) => {
+app.get('/api/dashboard/top-products', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const result = await pool.query(
             'SELECT id, name, price, stock_quantity FROM products WHERE is_active = true ORDER BY created_at DESC LIMIT 5'

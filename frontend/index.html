@@ -5,452 +5,121 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#ebc201" />
-  <meta name="description" content="Mutanha - Roupas e Acessórios" />
-  <meta name="keywords" content="Roupas e Acessórios" />
-  <meta property="og:title" content="Mutanha - Roupas e Acessórios " />
-  <meta property="og:description" content="Encontre as melhores roupas e acessórios" />
+  <meta name="description" content="Mutanha - roupas e acessorios" />
+  <meta name="keywords" content="moda, roupas, acessorios, mutanha" />
+  <meta property="og:title" content="Mutanha - roupas e acessorios" />
+  <meta property="og:description" content="Colecoes urbanas com estilo premium." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://Mutanha.com.ao" />
-
-  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
-  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
-    href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Plus+Jakarta+Sans%3Awght%40400%3B500%3B700%3B800" />
-  <title>Mutanha - Roupas e Acessórios</title>
+  <meta property="og:url" content="https://mutanha.com.ao" />
+  <title>Mutanha - Home</title>
   <link rel="icon" href="favicon.ico" />
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin />
+  <link rel="stylesheet" as="style" onload="this.rel='stylesheet'"
+    href="https://fonts.googleapis.com/css2?display=swap&family=Plus+Jakarta+Sans:wght@400;500;700;800&family=Noto+Sans:wght@400;700&family=Playfair+Display:wght@600;700" />
   <link rel="stylesheet" href="src/styles/index.css" />
   <link rel="stylesheet" href="src/styles/style.css" />
-
-  <script src="src/js/script.js"></script>
-
-  <style>
-    .hidden {
-      display: none;
-    }
-
-    .active {
-      display: flex !important;
-    }
-  </style>
+  <link rel="stylesheet" href="src/styles/home-layout.css" />
 </head>
 
-<body>
-  <div class="relative flex size-full min-h-screen flex-col bg-[#fcfaf8] group/design-root overflow-x-hidden"
-    style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
-    <div class="layout-container flex h-full grow flex-col">
-      <header class="flex items-center justify-between whitespace-nowrap border-b border-b-[#f3ece7] px-10 py-3"
-        role="banner">
-        <div class="flex items-center gap-4 text-[#250129]">
-          <div class="logo">
-            <img src="src/IMG/logoB.jpg" alt="logo">
-          </div>
-        </div>
-        <nav class="flex flex-1 justify-end gap-8" role="navigation" aria-label="Menu principal">
-          <div class="flex items-center gap-9">
-            <a class="text-[#250129] text-sm font-medium leading-normal hover:text-[#ebc201] transition-colors"
-              href="index.html" aria-current="page">Home</a>
-            <a class="text-[#250129] text-sm font-medium leading-normal hover:text-[#ebc201] transition-colors"
-              href="roupas.html">Roupas</a>
-            <a class="text-[#250129] text-sm font-medium leading-normal hover:text-[#ebc201] transition-colors"
-              href="acess.html">Acessórios</a>
-            <a class="text-[#250129] text-sm font-medium leading-normal hover:text-[#ebc201] transition-colors"
-              href="#">Comunidade</a>
-          </div>
-          <div class="flex gap-2" id="user-actions">
-            <!-- Botões serão carregados dinamicamente -->
-          </div>
-          <div
-            class="hidden h-12 bg-[#ebc201] rounded-full cursor-pointer flex items-center justify-center text-white font-bold text-lg"
-            id="userInitial">
-            M
-          </div>
-          
+<body class="mix-home" style='font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;'>
+  <main class="mix-page">
+    <section class="mix-hero" aria-label="Colecao principal">
+      <img class="mix-hero-bg" src="src/IMG/IMG2.jpg" alt="Colecao principal Mutanha" />
+      <div class="mix-hero-shade" aria-hidden="true"></div>
+
+      <header class="mix-hero-header">
+        <nav class="mix-hero-nav" aria-label="Navegacao principal">
+          <a href="index.html" aria-current="page">Home</a>
+          <a href="public/roupas.html">Shop</a>
+          <a href="public/search.html">Search</a>
+          <a href="public/acess.html">Acessorios</a>
+          <a href="public/login.html">Conta</a>
         </nav>
+
+        <a href="index.html" class="mix-brand">Mutanha</a>
+
+        <div class="mix-hero-tools">
+          <a class="mix-icon-btn" href="public/search.html" aria-label="Pesquisar">
+            <svg viewBox="0 0 256 256" aria-hidden="true">
+              <path
+                d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z">
+              </path>
+            </svg>
+          </a>
+          <button class="mix-icon-btn" type="button" aria-label="Favoritos">
+            <svg viewBox="0 0 256 256" aria-hidden="true">
+              <path
+                d="M178,32c-20.65,0-38.73,8.88-50,23.89C116.73,40.88,98.65,32,78,32A62.07,62.07,0,0,0,16,94c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,220.66,240,164,240,94A62.07,62.07,0,0,0,178,32Z">
+              </path>
+            </svg>
+          </button>
+          <div id="user-actions" class="mix-user-actions"></div>
+        </div>
       </header>
 
-      <div class="px-20 mt-2 flex flex-1 justify-center py-5">
-        <div class="layout-content-container flex flex-col max-w-[90%] flex-1">
-          <div class="@container">
-            <div class="@[480px]:p-4">
-              <div class="section-p">
-                <div class="text">
-                  <h1 class=" text-[52px] cursor-pointer font-bold leading-tight tracking-[-0.015em]">Mutanha
-                  </h1>
-
-                  <h4>roupas & acessórios <br> <strong>a</strong> <span>Arte nos inspira!!!</span> </h4>
-
-                </div>
-                <div class="content-img">
-                  <img loading="lazy" alt="Imagem" src="src/IMG/IMG2.jpg" class="fadeInRight" id="count-jnUTBE5"
-                    data-width="353">
-                </div>
-
-
-                <div class="is-block efeito-back">
-                  <svg viewBox="0 0 500 388" fill="rgba(244, 128, 115.00000000000001, 0.11)"
-                    style="height: 150.797px; width: 300px;" class="usa-cor-solida active fundo">
-                    <defs class="defs-paths">
-                      <path
-                        d="M124.7,-172.9C168.7,-165.8,216.2,-143.1,244.4,-104.8C272.5,-66.4,281.3,-12.4,269.7,35.8C258.1,83.9,226.2,126.1,189.1,157.5C152,189,109.8,209.6,70.4,205.7C30.9,201.8,-5.8,173.3,-45.4,159.5C-85,145.7,-127.5,146.5,-160.5,128.1C-193.5,109.8,-217,72.2,-215.2,35.5C-213.4,-1.2,-186.3,-36.9,-162.7,-68.4C-139.1,-99.8,-119,-126.9,-92.5,-141.9C-66,-157,-33,-160,3.7,-165.7C40.4,-171.5,80.7,-180,124.7,-172.9Z"
-                        transform="translate(220,180)" id="ACq9tai"></path>
-                      <clippath id="RTjDODD">
-                        <use xlink:href="#ACq9tai"></use>
-                      </clippath>
-                    </defs>
-
-                    <g class="forma">
-                      <use xlink:href="#ACq9tai" stroke="#000" clip-path="url(#RTjDODD)"
-                        style="height: auto; width: auto;" class="active g-pKoH6tU"></use>
-                    </g>
-                  </svg>
-                </div>
-              </div>
-            
-            </div>
-          </div>
-          <h2 class="text-[#250129] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
-            Produtos Destaque</h2>
-          <!-- Sessão 1: Produtos em Destaque -->
-          <div
-            class="flex overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden mb-6">
-            <div class="flex items-stretch p-4 gap-3 min-w-full" id="featured-products">
-              <!-- Produtos serão carregados dinamicamente aqui -->
-              <div class="flex items-center justify-center h-32 text-[#9a6c4c]">
-                <p>Carregando produtos...</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sessão 2: Novidades -->
-          <h2 class="text-[#250129] text-[22px] font-bold leading-tight tracking-[-0.015em] px-4 pb-3 pt-5">
-            Novidades</h2>
-          <div
-            class="flex overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div class="flex items-stretch p-4 gap-3 min-w-full" id="new-products">
-              <!-- Produtos serão carregados dinamicamente aqui -->
-              <div class="flex items-center justify-center h-32 text-[#9a6c4c]">
-                <p>Carregando produtos...</p>
-              </div>
-            </div>
-          </div>
-
-
-          <div class="flex justify-between items-center px-4 pb-3 pt-5">
-            <h2 class="text-[#250129] text-[22px] font-bold leading-tight tracking-[-0.015em]">Avaliações dos Clientes
-            </h2>
-            <button onclick="showModal('reviewModal')"
-              class="bg-[#ebc201] text-white px-4 py-2 rounded-md hover:bg-[#d67a3a] transition-colors text-sm font-medium">
-              Adicionar Avaliação
-            </button>
-          </div>
-          <div class="flex flex-col gap-8 overflow-x-hidden bg-[#fcfaf8] p-4" id="reviews-container">
-            <div class="flex flex-col gap-3 bg-[#fcfaf8]">
-              <div class="flex items-center gap-3">
-                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                  style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAI2ud4dn_HmZ4i34PyQUwh5jcsw4Z8oJBOsmO6Zrb9jtGhfd31tHMBos9XbQDhPsK5ntoPua3GlW31w-DGp4otP4pq9i3AP3dTmca3Io5PexmvxCixXW9Q2g539lmJzUGfTrLWIsKFg-Q3pPzRZOlbKMbAIN3iiWFdYB5g9oY5IJB03bK4LVMFn5ypSWf726iP5LDqXKrh4Q6wpq4IY5zNSFf00ulTSao9ZUUtWl6CqdCU9m0Lmz1PO-2aXBlyfIQV77WdbSKbsfo");'>
-                </div>
-                <div class="flex-1">
-                  <p class="text-[#250129] text-base font-medium leading-normal">Sofia Carvalho</p>
-                  <p class="text-[#9a6c4c] text-sm font-normal leading-normal">2 meses atrás</p>
-                </div>
-              </div>
-              <div class="flex gap-0.5">
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-              </div>
-              <p class="text-[#250129] text-base font-normal leading-normal">
-                "Adorei as leggings que comprei na Mutanha! A qualidade é incrível e elas vestem perfeitamente. Me
-                sinto muito confiante usando-as na academia"
-              </p>
-              <div class="flex gap-9 text-[#9a6c4c]">
-                <button class="flex items-center gap-2">
-                  <div class="text-inherit" data-icon="ThumbsUp" data-size="20px" data-weight="regular">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                      viewBox="0 0 256 256">
-                      <path
-                        d="M234,80.12A24,24,0,0,0,216,72H160V56a40,40,0,0,0-40-40,8,8,0,0,0-7.16,4.42L75.06,96H32a16,16,0,0,0-16,16v88a16,16,0,0,0,16,16H204a24,24,0,0,0,23.82-21l12-96A24,24,0,0,0,234,80.12ZM32,112H72v88H32ZM223.94,97l-12,96a8,8,0,0,1-7.94,7H88V105.89l36.71-73.43A24,24,0,0,1,144,56V80a8,8,0,0,0,8,8h64a8,8,0,0,1,7.94,9Z">
-                      </path>
-                    </svg>
-                  </div>
-                  <p class="text-inherit">12</p>
-                </button>
-                <button class="flex items-center gap-2">
-                  <div class="text-inherit" data-icon="ThumbsDown" data-size="20px" data-weight="regular">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                      viewBox="0 0 256 256">
-                      <path
-                        d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
-                      </path>
-                    </svg>
-                  </div>
-                  <p class="text-inherit">2</p>
-                </button>
-              </div>
-            </div>
-            <div class="flex flex-col gap-3 bg-[#fcfaf8]">
-              <div class="flex items-center gap-3">
-                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                  style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBzf8fAYZhix9tcl2-Ie1qrdzjFfziEkiAPID-HNyKwfESLRxdEXs_9VuHavdeC8w8BMmpO9mYUWQL0_bwpJXTB5Fu0TYA-q1kAtGqW2w7uxNP8sT8v5yRqXZPyb7WO8WXFcvxgK8anbRkXGn_t5tD_2czNCTQe2qCBbqznu6IBOkGrb4NQ3gPt7nm9X29CqcWF-pIN0Iq_rPCIFzyUrBPjLb3EEw8YKbHtydRmrvwOO3qt6QjcADMNA_cYwFcWml-n1D7gNjQI5dk");'>
-                </div>
-                <div class="flex-1">
-                  <p class="text-[#250129] text-base font-medium leading-normal">Olivia Bennett</p>
-                  <p class="text-[#9a6c4c] text-sm font-normal leading-normal">3 meses atrás</p>
-                </div>
-              </div>
-              <div class="flex gap-0.5">
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#d7bead]" data-icon="Star" data-size="20px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M239.2,97.29a16,16,0,0,0-13.81-11L166,81.17,142.72,25.81h0a15.95,15.95,0,0,0-29.44,0L90.07,81.17,30.61,86.32a16,16,0,0,0-9.11,28.06L66.61,153.8,53.09,212.34a16,16,0,0,0,23.84,17.34l51-31,51.11,31a16,16,0,0,0,23.84-17.34l-13.51-58.6,45.1-39.36A16,16,0,0,0,239.2,97.29Zm-15.22,5-45.1,39.36a16,16,0,0,0-5.08,15.71L187.35,216v0l-51.07-31a15.9,15.9,0,0,0-16.54,0l-51,31h0L82.2,157.4a16,16,0,0,0-5.08-15.71L32,102.35a.37.37,0,0,1,0-.09l59.44-5.14a16,16,0,0,0,13.35-9.75L128,32.08l23.2,55.29a16,16,0,0,0,13.35,9.75L224,102.26S224,102.32,224,102.33Z">
-                    </path>
-                  </svg>
-                </div>
-              </div>
-              <p class="text-[#250129] text-base font-normal leading-normal">
-                "A roupa é muito confortável e oferece excelente aderência. Estou feliz com a minha compra, mas gostaria
-                que viesse em mais cores"
-              </p>
-              <div class="flex gap-9 text-[#9a6c4c]">
-                <button class="flex items-center gap-2">
-                  <div class="text-inherit" data-icon="ThumbsUp" data-size="20px" data-weight="regular">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                      viewBox="0 0 256 256">
-                      <path
-                        d="M234,80.12A24,24,0,0,0,216,72H160V56a40,40,0,0,0-40-40,8,8,0,0,0-7.16,4.42L75.06,96H32a16,16,0,0,0-16,16v88a16,16,0,0,0,16,16H204a24,24,0,0,0,23.82-21l12-96A24,24,0,0,0,234,80.12ZM32,112H72v88H32ZM223.94,97l-12,96a8,8,0,0,1-7.94,7H88V105.89l36.71-73.43A24,24,0,0,1,144,56V80a8,8,0,0,0,8,8h64a8,8,0,0,1,7.94,9Z">
-                      </path>
-                    </svg>
-                  </div>
-                  <p class="text-inherit">8</p>
-                </button>
-                <button class="flex items-center gap-2">
-                  <div class="text-inherit" data-icon="ThumbsDown" data-size="20px" data-weight="regular">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                      viewBox="0 0 256 256">
-                      <path
-                        d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
-                      </path>
-                    </svg>
-                  </div>
-                  <p class="text-inherit">1</p>
-                </button>
-              </div>
-            </div>
-            <div class="flex flex-col gap-3 bg-[#fcfaf8]">
-              <div class="flex items-center gap-3">
-                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-                  style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDc-D3HJ9IJa6DtajGi6FtaVAcOLvVRFyL3xlicK56oI1BD289gDaeAoXGltA-y83dA5sgSmo01stBhuYMZta7Pv7-8m02-M_-Xcvothqa5QX8A4kgX9Du2F3GzHz8KwsZvvTdFvqaavhgWDaEAlyNlFx7E4rrK_Y0qIol_0rkmOKuIe6iZrRUZ18OhndEorDtglOMv7R-LrIpmlU2Txr1hvdszNVHDBoQ93d36D8brVFIdfpW7TK6OeqMeDOHDHAi064V7zCPHXr0");'>
-                </div>
-                <div class="flex-1">
-                  <p class="text-[#250129] text-base font-medium leading-normal">Ava Harper</p>
-                  <p class="text-[#9a6c4c] text-sm font-normal leading-normal">4 meses atrás</p>
-                </div>
-              </div>
-              <div class="flex gap-0.5">
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-                <div class="text-[#ebc201]" data-icon="Star" data-size="20px" data-weight="fill">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-31-51,31a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z">
-                    </path>
-                  </svg>
-                </div>
-              </div>
-              <p class="text-[#250129] text-base font-normal leading-normal">
-                "Os halteres ajustáveis ​​são uma verdadeira revolução nos meus treinos em casa. São fáceis de ajustar e
-                muito resistentes. Recomendo muito!"
-              </p>
-              <div class="flex gap-9 text-[#9a6c4c]">
-                <button class="flex items-center gap-2">
-                  <div class="text-inherit" data-icon="ThumbsUp" data-size="20px" data-weight="regular">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                      viewBox="0 0 256 256">
-                      <path
-                        d="M234,80.12A24,24,0,0,0,216,72H160V56a40,40,0,0,0-40-40,8,8,0,0,0-7.16,4.42L75.06,96H32a16,16,0,0,0-16,16v88a16,16,0,0,0,16,16H204a24,24,0,0,0,23.82-21l12-96A24,24,0,0,0,234,80.12ZM32,112H72v88H32ZM223.94,97l-12,96a8,8,0,0,1-7.94,7H88V105.89l36.71-73.43A24,24,0,0,1,144,56V80a8,8,0,0,0,8,8h64a8,8,0,0,1,7.94,9Z">
-                      </path>
-                    </svg>
-                  </div>
-                  <p class="text-inherit">15</p>
-                </button>
-                <button class="flex items-center gap-2">
-                  <div class="text-inherit" data-icon="ThumbsDown" data-size="20px" data-weight="regular">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" fill="currentColor"
-                      viewBox="0 0 256 256">
-                      <path
-                        d="M239.82,157l-12-96A24,24,0,0,0,204,40H32A16,16,0,0,0,16,56v88a16,16,0,0,0,16,16H75.06l37.78,75.58A8,8,0,0,0,120,240a40,40,0,0,0,40-40V184h56a24,24,0,0,0,23.82-27ZM72,144H32V56H72Zm150,21.29a7.88,7.88,0,0,1-6,2.71H152a8,8,0,0,0-8,8v24a24,24,0,0,1-19.29,23.54L88,150.11V56H204a8,8,0,0,1,7.94,7l12,96A7.87,7.87,0,0,1,222,165.29Z">
-                      </path>
-                    </svg>
-                  </div>
-                  <p class="text-inherit">3</p>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="mix-hero-content">
+        <p class="mix-kicker">URBAN EDGE</p>
+        <h1>Jackets for the Modern Man</h1>
+        <a href="public/roupas.html" class="mix-cta">Discovery Now</a>
       </div>
 
-      <footer class="flex justify-center">
-        <div class="flex max-w-[960px] flex-1 flex-col">
-          <footer class="flex flex-col gap-6 px-5 py-10 text-center @container">
-            <div class="flex flex-wrap items-center justify-center gap-6 @[480px]:flex-row @[480px]:justify-around">
-              <a class="text-[#9a6c4c] text-base font-normal leading-normal min-w-40" href="#">Sobre-nós</a>
-              <a class="text-[#9a6c4c] text-base font-normal leading-normal min-w-40" href="#">Contactos</a>
-              <a class="text-[#9a6c4c] text-base font-normal leading-normal min-w-40" href="#">FAQ</a>
-              <a class="text-[#9a6c4c] text-base font-normal leading-normal min-w-40" href="#">Politicas de
-                privacidade</a>
-              <a class="text-[#9a6c4c] text-base font-normal leading-normal min-w-40" href="#">Termos e Serviços</a>
-            </div>
-            <div class="flex flex-wrap justify-center gap-4">
-              <a href="#">
-                <div class="text-[#9a6c4c]" data-icon="InstagramLogo" data-size="24px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160ZM176,24H80A56.06,56.06,0,0,0,24,80v96a56.06,56.06,0,0,0,56,56h96a56.06,56.06,0,0,0,56-56V80A56.06,56.06,0,0,0,176,24Zm40,152a40,40,0,0,1-40,40H80a40,40,0,0,1-40-40V80A40,40,0,0,1,80,40h96a40,40,0,0,1,40,40ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z">
-                    </path>
-                  </svg>
-                </div>
-              </a>
-              <a href="#">
-                <div class="text-[#9a6c4c]" data-icon="FacebookLogo" data-size="24px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,191.63V152h24a8,8,0,0,0,0-16H136V112a16,16,0,0,1,16-16h16a8,8,0,0,0,0-16H152a32,32,0,0,0-32,32v24H96a8,8,0,0,0,0,16h24v63.63a88,88,0,1,1,16,0Z">
-                    </path>
-                  </svg>
-                </div>
-              </a>
-              <a href="#">
-                <div class="text-[#9a6c4c]" data-icon="TwitterLogo" data-size="24px" data-weight="regular">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" fill="currentColor"
-                    viewBox="0 0 256 256">
-                    <path
-                      d="M247.39,68.94A8,8,0,0,0,240,64H209.57A48.66,48.66,0,0,0,168.1,40a46.91,46.91,0,0,0-33.75,13.7A47.9,47.9,0,0,0,120,88v6.09C79.74,83.47,46.81,50.72,46.46,50.37a8,8,0,0,0-13.65,4.92c-4.31,47.79,9.57,79.77,22,98.18a110.93,110.93,0,0,0,21.88,24.2c-15.23,17.53-39.21,26.74-39.47,26.84a8,8,0,0,0-3.85,11.93c.75,1.12,3.75,5.05,11.08,8.72C53.51,229.7,65.48,232,80,232c70.67,0,129.72-54.42,135.75-124.44l29.91-29.9A8,8,0,0,0,247.39,68.94Zm-45,29.41a8,8,0,0,0-2.32,5.14C196,166.58,143.28,216,80,216c-10.56,0-18-1.4-23.22-3.08,11.51-6.25,27.56-17,37.88-32.48A8,8,0,0,0,92,169.08c-.47-.27-43.91-26.34-44-96,16,13,45.25,33.17,78.67,38.79A8,8,0,0,0,136,104V88a32,32,0,0,1,9.6-22.92A30.94,30.94,0,0,1,167.9,56c12.66.16,24.49,7.88,29.44,19.21A8,8,0,0,0,204.67,80h16Z">
-                    </path>
-                  </svg>
-                </div>
-              </a>
-            </div>
-            <p class="text-[#9a6c4c] text-base font-normal leading-normal">@2026 Mutanha. todos os direitos
-              reservados.</p>
-          </footer>
-        </div>
-      </footer>
+      <button class="mix-hero-arrow mix-left" type="button" aria-label="Slide anterior">&#8249;</button>
+      <button class="mix-hero-arrow mix-right" type="button" aria-label="Proximo slide">&#8250;</button>
+    </section>
 
-    </div>
-  </div>
+    <section class="mix-arrivals" aria-labelledby="mix-arrivals-title">
+      <h2 id="mix-arrivals-title">New Arrivals</h2>
 
+      <div class="mix-tabs" role="tablist" aria-label="Categorias">
+        <button type="button" class="is-active">WOMEN</button>
+        <button type="button">MEN</button>
+        <button type="button">SHOES</button>
+        <button type="button">BAGS</button>
+        <button type="button">ACCESSORIES</button>
+      </div>
 
-  <!-- Modal de Checkout -->
-  <div id="checkout-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-1000 hidden">
+      <div id="featured-products" class="mix-products-row">
+        <div class="mix-loading-card">Carregando produtos...</div>
+      </div>
+      <div id="new-products" class="mix-products-row">
+        <div class="mix-loading-card">Carregando produtos...</div>
+      </div>
+    </section>
+
+    <section class="mix-promo-grid" aria-label="Promocoes e colecoes">
+      <article class="mix-promo mix-promo-a">
+        <p class="mix-promo-tag">ETHEREAL ELEGANCE</p>
+        <h3>Where Dreams Meet Couture</h3>
+        <a href="public/roupas.html">Shop Now</a>
+      </article>
+
+      <article class="mix-promo mix-promo-b">
+        <p class="mix-promo-tag">RADIANT REVERIE</p>
+        <h3>Enchanting Styles for Every Woman</h3>
+        <a href="public/roupas.html">Shop Now</a>
+      </article>
+
+      <article class="mix-promo mix-promo-c">
+        <p class="mix-promo-tag">URBAN STRIDES</p>
+        <h3>Chic Footwear for City Living</h3>
+        <a href="public/acess.html">Shop Now</a>
+      </article>
+
+      <article class="mix-promo mix-promo-d">
+        <p class="mix-promo-tag">TREND REPORT</p>
+        <h3>Trendsetting Bags for Her</h3>
+        <strong>50%</strong>
+        <a href="public/acess.html">Shop Now</a>
+      </article>
+    </section>
+  </main>
+
+  <div id="checkout-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-bold text-[#250129]">Finalizar Compra</h3>
-        <button onclick="document.getElementById('checkout-modal').classList.remove('active')"
-          class="text-gray-500 hover:text-gray-700">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onclick="closeModal('checkout-modal')" class="text-gray-500 hover:text-gray-700" type="button">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
@@ -458,250 +127,71 @@
 
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-[#250129] mb-2">Método de Pagamento *</label>
+          <label class="block text-sm font-medium text-[#250129] mb-2" for="payment-method">Metodo de pagamento *</label>
           <select id="payment-method"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ebc201]">
             <option value="">Selecione...</option>
-            <option value="Cartão de Crédito">Cartão de Crédito</option>
-            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="Cartao de Credito">Cartao de Credito</option>
+            <option value="Cartao de Debito">Cartao de Debito</option>
             <option value="Dinheiro">Dinheiro</option>
-            <option value="Transferência Bancária">Transferência Bancária</option>
-            <option value="MBWay">Multicaixa espress</option>
+            <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+            <option value="Multicaixa Express">Multicaixa Express</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-[#250129] mb-2">Endereço de Entrega</label>
+          <label class="block text-sm font-medium text-[#250129] mb-2" for="shipping-address">Endereco de entrega</label>
           <textarea id="shipping-address" rows="3"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ebc201]"
-            placeholder="Deixe em branco para usar o endereço cadastrado"></textarea>
+            placeholder="Opcional"></textarea>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-[#250129] mb-2">Observações</label>
+          <label class="block text-sm font-medium text-[#250129] mb-2" for="order-notes">Observacoes</label>
           <textarea id="order-notes" rows="2"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ebc201]"
-            placeholder="Observações opcionais..."></textarea>
+            placeholder="Opcional"></textarea>
         </div>
 
         <div class="flex gap-3 pt-4">
-          <button onclick="document.getElementById('checkout-modal').classList.remove('active')"
-            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button onclick="processOrder()"
-            class="flex-1 px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]">
-            Finalizar Pedido
-          </button>
+          <button onclick="closeModal('checkout-modal')"
+            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+            type="button">Cancelar</button>
+          <button onclick="processOrder()" class="flex-1 px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]"
+            type="button">Finalizar Pedido</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal de Sucesso -->
-  <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div id="success-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 text-center">
       <div class="mb-4">
-        <svg class="w-16 h-16 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-16 h-16 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
       </div>
 
-      <h3 class="text-lg font-bold text-[#250129] mb-2">Pedido Criado com Sucesso!</h3>
-      <p class="text-gray-600 mb-4">Seu pedido foi processado e está sendo preparado.</p>
+      <h3 class="text-lg font-bold text-[#250129] mb-2">Pedido criado com sucesso</h3>
+      <p class="text-gray-600 mb-4">Seu pedido foi processado.</p>
 
       <div class="bg-gray-50 rounded-lg p-4 mb-4">
-        <p class="text-sm text-gray-600">Número do Pedido:</p>
+        <p class="text-sm text-gray-600">Numero do pedido:</p>
         <p class="text-lg font-bold text-[#250129]" id="order-number"></p>
         <p class="text-sm text-gray-600 mt-2">Total:</p>
         <p class="text-lg font-bold text-[#ebc201]" id="order-total"></p>
       </div>
 
-      <button onclick="document.getElementById('success-modal').classList.remove('active')"
-        class="w-full px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]">
-        Continuar Comprando
+      <button onclick="closeModal('success-modal')"
+        class="w-full px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]" type="button">
+        Continuar comprando
       </button>
     </div>
   </div>
 
-  <!-- Modal de Avaliação -->
-  <div id="reviewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold text-[#250129]">Adicionar Avaliação</h2>
-        <button onclick="closeModal('reviewModal')" class="text-gray-500 hover:text-gray-700">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-
-      <form id="reviewForm" class="space-y-6">
-       
-        <!-- Avaliação por Estrelas -->
-        <div>
-          <label class="block text-sm font-medium text-[#250129] mb-3">Sua Avaliação</label>
-          <div class="flex gap-2" id="starRating">
-            <button type="button" class="text-2xl text-[#d7bead] hover:text-[#ebc201] transition-colors"
-              data-rating="1">★</button>
-            <button type="button" class="text-2xl text-[#d7bead] hover:text-[#ebc201] transition-colors"
-              data-rating="2">★</button>
-            <button type="button" class="text-2xl text-[#d7bead] hover:text-[#ebc201] transition-colors"
-              data-rating="3">★</button>
-            <button type="button" class="text-2xl text-[#d7bead] hover:text-[#ebc201] transition-colors"
-              data-rating="4">★</button>
-            <button type="button" class="text-2xl text-[#d7bead] hover:text-[#ebc201] transition-colors"
-              data-rating="5">★</button>
-          </div>
-          <p class="text-sm text-[#9a6c4c] mt-2">Clique nas estrelas para avaliar</p>
-        </div>
-
-        <!-- Comentário -->
-        <div>
-          <label class="block text-sm font-medium text-[#250129] mb-2">Seu Comentário</label>
-          <textarea id="reviewComment" rows="4"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ebc201]"
-            placeholder="Conte-nos sobre sua experiência com nossos produtos..."></textarea>
-        </div>
-
-        <!-- Produto Avaliado (Opcional) -->
-        <div>
-          <label class="block text-sm font-medium text-[#250129] mb-2">Produto Avaliado (Opcional)</label>
-          <select id="reviewProduct"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ebc201]">
-            <option value="">Selecione um produto (opcional)</option>
-            <!-- Produtos serão carregados dinamicamente -->
-          </select>
-        </div>
-
-        <!-- Categoria da Avaliação -->
-        <div>
-          <label class="block text-sm font-medium text-[#250129] mb-2">Categoria</label>
-          <select id="reviewCategory"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ebc201]">
-            <option value="geral">Avaliação Geral</option>
-            <option value="qualidade">Qualidade dos Produtos</option>
-            <option value="atendimento">Atendimento</option>
-            <option value="entrega">Entrega</option>
-            <option value="preco">Preço</option>
-          </select>
-        </div>
-
-        <!-- Botões de Ação -->
-        <div class="flex gap-3 pt-4">
-          <button type="button" onclick="closeModal('reviewModal')"
-            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
-            Cancelar
-          </button>
-          <button type="submit" class="flex-1 px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]">
-            Publicar Avaliação
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal de Reação -->
-  <div id="reactionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold text-[#250129]">Reagir à Avaliação</h3>
-        <button onclick="closeModal('reactionModal')" class="text-gray-500 hover:text-gray-700">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-
-      <div class="space-y-4">
-        <div class="text-center">
-          <p class="text-sm text-[#9a6c4c] mb-4">Esta avaliação foi útil para você?</p>
-          <div class="flex justify-center gap-4">
-            <button onclick="reactToReview('helpful')"
-              class="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-50 transition-colors">
-              <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                  d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                  clip-rule="evenodd"></path>
-              </svg>
-              <span class="text-sm font-medium">Útil</span>
-            </button>
-            <button onclick="reactToReview('not-helpful')"
-              class="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-50 transition-colors">
-              <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                  d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                  clip-rule="evenodd"></path>
-              </svg>
-              <span class="text-sm font-medium">Não Útil</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal de Compartilhamento -->
-  <div id="shareModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold text-[#250129]">Compartilhar Avaliação</h3>
-        <button onclick="closeModal('shareModal')" class="text-gray-500 hover:text-gray-700">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-[#250129] mb-2">Link da Avaliação</label>
-          <div class="flex gap-2">
-            <input type="text" id="shareLink" readonly
-              class="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-              value="https://Mutanha.com.ao/reviews/123">
-            <button onclick="copyShareLink()" class="px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]">
-              Copiar
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-[#250129] mb-3">Compartilhar via</label>
-          <div class="flex gap-3">
-            <button onclick="shareToSocial('facebook')"
-              class="flex-1 p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center gap-2">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              Facebook
-            </button>
-            <button onclick="shareToSocial('twitter')"
-              class="flex-1 p-3 bg-blue-400 text-white rounded-md hover:bg-blue-500 flex items-center justify-center gap-2">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-              </svg>
-              Twitter
-            </button>
-            <button onclick="shareToSocial('whatsapp')"
-              class="flex-1 p-3 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center justify-center gap-2">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488" />
-              </svg>
-              WhatsApp
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="src/js/scriptPrincipal.js"></script>
-  <script src="src/js/scriptRoupas.js"></script>
+  <script src="src/js/scriptPrincipal.js" defer></script>
 </body>
 
 </html>
