@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   syncSessionFromStorage();
   setupHeroSlider();
   setupArrivalsTabs();
+  setupAccountLinkNavigation();
   loadUserActions();
 
   if (isUserLoggedIn()) {
@@ -156,6 +157,19 @@ function setupArrivalsTabs() {
       tabs.forEach((button) => button.classList.remove('is-active'));
       tab.classList.add('is-active');
     });
+  });
+}
+
+function setupAccountLinkNavigation() {
+  const accountLink = document.querySelector('.mix-hero-nav a[href="public/login.html"]');
+  if (!accountLink) return;
+
+  accountLink.addEventListener('click', (event) => {
+    syncSessionFromStorage();
+    if (!isUserLoggedIn()) return;
+
+    event.preventDefault();
+    showProfileModal();
   });
 }
 

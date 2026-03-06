@@ -259,6 +259,8 @@ function setupEventListeners() {
     registerForm.addEventListener('submit', handleRegister);
   }
 
+  setupAccountLinkNavigation();
+
   const productModal = document.getElementById('productDetailModal');
   if (productModal) {
     productModal.addEventListener('click', (event) => {
@@ -278,6 +280,19 @@ function setupEventListeners() {
   });
 
   updateCategoryTabsState();
+}
+
+function setupAccountLinkNavigation() {
+  const accountLink = document.querySelector('.cat-nav a[href="login.html"]');
+  if (!accountLink) return;
+
+  accountLink.addEventListener('click', (event) => {
+    syncSessionFromStorage();
+    if (!isUserLoggedIn()) return;
+
+    event.preventDefault();
+    showProfileModal();
+  });
 }
 
 function setupCategoryTabs() {
