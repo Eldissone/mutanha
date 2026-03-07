@@ -1,420 +1,273 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mutanha Admin - Painel de Controle</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?display=swap&family=Noto+Sans:wght@400;500;700;900&family=Plus+Jakarta+Sans:wght@400;500;700;800">
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mutanha Admin</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?display=swap&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script src="admin.js" defer></script>
 </head>
 <body>
-    <div class="admin-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h1 class="logo">Mutanha Admin</h1>
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="#" class="nav-link active" data-page="dashboard">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
-                        </svg>
-                        Dashboard
-                    </a></li>
-                    <li><a href="#" class="nav-link" data-page="products">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                        </svg>
-                        Produtos
-                    </a></li>
-                    <li><a href="#" class="nav-link" data-page="orders">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                        </svg>
-                        Pedidos
-                    </a></li>
-                    <li><a href="#" class="nav-link" data-page="customers">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.8 0-1.54.37-2.01 1l-3.7 3.7c-.28.28-.44.66-.44 1.06V20h2v-6.24L16.5 18H20zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm2 16v-7H9V9c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v6h1.5v7h4z"/>
-                        </svg>
-                        Clientes
-                    </a></li>
-                    <li><a href="#" class="nav-link" data-page="analytics">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
-                        </svg>
-                        Analytics
-                    </a></li>
-                    <li><a href="#" class="nav-link" data-page="settings">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
-                        </svg>
-                        Configurações
-                    </a></li>
-                </ul>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="top-header">
-                <div class="header-left">
-                    <h2 id="page-title">Dashboard</h2>
-                </div>
-                <div class="header-right">
-                    <div class="admin-profile">
-                        <span>Admin</span>
-                        <button class="logout-btn">Sair</button>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Dashboard Page -->
-            <div id="dashboard-page" class="page-content active">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                            </svg>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Total de Produtos</h3>
-                            <p class="stat-number">24</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                            </svg>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Pedidos Pendentes</h3>
-                            <p class="stat-number">8</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                            </svg>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Vendas Hoje</h3>
-                            <p class="stat-number">AOA 45,000</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.8 0-1.54.37-2.01 1l-3.7 3.7c-.28.28-.44.66-.44 1.06V20h2v-6.24L16.5 18H20z"/>
-                            </svg>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Clientes Ativos</h3>
-                            <p class="stat-number">156</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-grid">
-                    <div class="recent-orders">
-                        <h3>Pedidos Recentes</h3>
-                        <div class="order-list">
-                            <div class="order-item">
-                                <div class="order-info">
-                                    <span class="order-id">#12345</span>
-                                    <span class="order-customer">Maria Silva</span>
-                                    <span class="order-amount">AOA 12,500</span>
-                                </div>
-                                <span class="order-status pending">Pendente</span>
-                            </div>
-                            <div class="order-item">
-                                <div class="order-info">
-                                    <span class="order-id">#12344</span>
-                                    <span class="order-customer">João Santos</span>
-                                    <span class="order-amount">AOA 8,750</span>
-                                </div>
-                                <span class="order-status completed">Concluído</span>
-                            </div>
-                            <div class="order-item">
-                                <div class="order-info">
-                                    <span class="order-id">#12343</span>
-                                    <span class="order-customer">Ana Costa</span>
-                                    <span class="order-amount">AOA 15,200</span>
-                                </div>
-                                <span class="order-status processing">Processando</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="top-products">
-                        <h3>Produtos Mais Vendidos</h3>
-                        <div class="product-list">
-                            <div class="product-item">
-                                <img src="../src/IMG/4.jpg" alt="vestido">
-                                <div class="product-info">
-                                    <h4>Vestido de alça</h4>
-                                    <p>AOA 12,000</p>
-                                </div>
-                            </div>
-                            <div class="product-item">
-                                <img src="../src/IMG/brincos.jpg" alt="brincos">
-                                <div class="product-info">
-                                    <h4>Conjunto de brincos</h4>
-                                    <p>AOA 4,500</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Products Page -->
-            <div id="products-page" class="page-content">
-                <div class="page-header">
-                    <h2>Gerenciar Produtos</h2>
-                    <button class="btn btn-primary" id="add-product-btn">Adicionar Produto</button>
-                </div>
-
-                <div class="products-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Imagem</th>
-                                <th>Nome</th>
-                                <th>Categoria</th>
-                                <th>Preço</th>
-                                <th>Estoque</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="products-tbody">
-                            <!-- Products will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Orders Page -->
-            <div id="orders-page" class="page-content">
-                <div class="page-header">
-                    <h2>Gerenciar Pedidos</h2>
-                </div>
-
-                <div class="orders-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Cliente</th>
-                                <th>Email</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Data</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-tbody">
-                            <!-- Orders will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Customers Page -->
-            <div id="customers-page" class="page-content">
-                <div class="page-header">
-                    <h2>Gerenciar Clientes</h2>
-                </div>
-
-                <div class="customers-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Telefone</th>
-                                <th>Pedidos</th>
-                                <th>Total Gasto</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customers-tbody">
-                            <!-- Customers will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Analytics Page -->
-            <div id="analytics-page" class="page-content">
-                <div class="page-header">
-                    <h2>Analytics</h2>
-                </div>
-
-                <div class="analytics-grid">
-                    <div class="chart-container">
-                        <h3>Vendas Mensais</h3>
-                        <div class="chart-placeholder">
-                            <p>Gráfico de vendas será exibido aqui</p>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <h3>Produtos Mais Vendidos</h3>
-                        <div class="chart-placeholder">
-                            <p>Gráfico de produtos será exibido aqui</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Page -->
-            <div id="settings-page" class="page-content">
-                <div class="page-header">
-                    <h2>Configurações</h2>
-                </div>
-
-                <div class="settings-form">
-                    <div class="form-group">
-                        <label>Nome da Loja</label>
-                        <input type="text" value="Mutanha" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Email de Contato</label>
-                        <input type="email" value="contato@Mutanha.com.ao" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Telefone</label>
-                        <input type="tel" value="+244 123 456 789" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Endereço</label>
-                        <textarea class="form-input">Luanda, Angola</textarea>
-                    </div>
-                    <button class="btn btn-primary">Salvar Configurações</button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Add Product Modal -->
-    <div id="add-product-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Adicionar Produto</h3>
-                <button class="close-btn">&times;</button>
-            </div>
-            <form id="add-product-form">
-                <div class="form-group">
-                    <label>Nome do Produto</label>
-                    <input type="text" name="name" required class="form-input">
-                </div>
-                <div class="form-group">
-                    <label>Descrição</label>
-                    <textarea name="description" class="form-input"></textarea>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Categoria</label>
-                        <select name="category" class="form-input">
-                            <option value="roupas">Roupas</option>
-                            <option value="acessorios">Acessórios</option>
-                            <option value="calçados">Calçados</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Preço (AOA)</label>
-                        <input type="number" name="price" required class="form-input">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Estoque</label>
-                        <input type="number" name="stock" required class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Imagem do Produto</label>
-                        <input type="file" name="image" accept="image/*" class="form-input">
-                        <small class="form-help">Formatos aceitos: JPG, PNG, GIF, WebP (máx. 5MB)</small>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Adicionar Produto</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Product Modal -->
-    <div id="edit-product-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Editar Produto</h3>
-                <button class="close-btn">&times;</button>
-            </div>
-            <form id="edit-product-form">
-                <input type="hidden" name="product_id" id="edit-product-id">
-                <div class="form-group">
-                    <label>Nome do Produto</label>
-                    <input type="text" name="name" id="edit-product-name" required class="form-input">
-                </div>
-                <div class="form-group">
-                    <label>Descrição</label>
-                    <textarea name="description" id="edit-product-description" class="form-input"></textarea>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Categoria</label>
-                        <select name="category" id="edit-product-category" class="form-input">
-                            <option value="roupas">Roupas</option>
-                            <option value="acessorios">Acessórios</option>
-                            <option value="calçados">Calçados</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Preço (AOA)</label>
-                        <input type="number" name="price" id="edit-product-price" required class="form-input">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Estoque</label>
-                        <input type="number" name="stock" id="edit-product-stock" required class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select name="status" id="edit-product-status" class="form-input">
-                            <option value="active">Ativo</option>
-                            <option value="inactive">Inativo</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Imagem Atual</label>
-                    <div class="current-image">
-                        <img id="edit-product-current-image" src="" alt="Imagem atual" style="max-width: 200px; max-height: 200px; object-fit: cover; border-radius: 8px;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Nova Imagem (opcional)</label>
-                    <input type="file" name="image" accept="image/*" class="form-input">
-                    <small class="form-help">Deixe em branco para manter a imagem atual. Formatos aceitos: JPG, PNG, GIF, WebP (máx. 5MB)</small>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="admin.js"></script>
+<div class="admin-shell">
+<aside class="admin-sidebar" id="admin-sidebar" aria-label="Menu administrativo">
+<div class="sidebar-brand">
+<div>
+<p class="eyebrow">Mutanha studio</p>
+<h1>Painel admin</h1>
+</div>
+<button type="button" class="icon-btn sidebar-toggle-inline" id="sidebar-close-btn" aria-label="Fechar menu">x</button>
+</div>
+<div class="sidebar-section">
+<p class="sidebar-label">Operacao</p>
+<nav class="sidebar-nav">
+<button type="button" class="nav-link is-active" data-page="dashboard" data-title="Dashboard">Dashboard</button>
+<button type="button" class="nav-link" data-page="products" data-title="Produtos">Produtos</button>
+<button type="button" class="nav-link" data-page="orders" data-title="Pedidos">Pedidos</button>
+<button type="button" class="nav-link" data-page="customers" data-title="Clientes">Clientes</button>
+<button type="button" class="nav-link" data-page="analytics" data-title="Analytics">Analytics</button>
+<button type="button" class="nav-link" data-page="settings" data-title="Configuracoes">Configuracoes</button>
+</nav>
+</div>
+<div class="sidebar-section">
+<p class="sidebar-label">Abrir paginas</p>
+<div class="site-links">
+<a class="site-link" data-route="home" href="/index.html" target="_blank" rel="noreferrer">Home</a>
+<a class="site-link" data-route="shop" href="/public/roupas.html" target="_blank" rel="noreferrer">Catalogo</a>
+<a class="site-link" data-route="accessories" href="/public/acess.html" target="_blank" rel="noreferrer">Acessorios</a>
+<a class="site-link" data-route="search" href="/public/search.html" target="_blank" rel="noreferrer">Pesquisa</a>
+<a class="site-link" data-route="account" href="/public/login.html" target="_blank" rel="noreferrer">Conta</a>
+</div>
+</div>
+<div class="sidebar-foot">
+<p class="sidebar-foot-title">Sessao</p>
+<strong id="session-user">Administrador</strong>
+<span id="session-status">Sessao ativa neste navegador</span>
+</div>
+</aside>
+<div class="admin-backdrop" id="admin-backdrop"></div>
+<main class="admin-main">
+<header class="topbar">
+<div class="topbar-left">
+<button type="button" class="icon-btn sidebar-toggle" id="sidebar-open-btn" aria-label="Abrir menu">=</button>
+<div>
+<p class="eyebrow">Administracao</p>
+<h2 id="page-title">Dashboard</h2>
+</div>
+</div>
+<div class="topbar-actions">
+<a class="btn btn-secondary" data-route="home" href="/index.html" target="_blank" rel="noreferrer">Ver loja</a>
+<button type="button" class="btn btn-ghost" id="refresh-btn">Atualizar dados</button>
+<button type="button" class="btn btn-primary" id="logout-btn">Sair</button>
+</div>
+</header>
+<section class="quick-links" aria-label="Atalhos do site">
+<a class="quick-link" data-route="home" href="/index.html" target="_blank" rel="noreferrer">Home</a>
+<a class="quick-link" data-route="shop" href="/public/roupas.html" target="_blank" rel="noreferrer">Roupas</a>
+<a class="quick-link" data-route="accessories" href="/public/acess.html" target="_blank" rel="noreferrer">Acessorios</a>
+<a class="quick-link" data-route="search" href="/public/search.html" target="_blank" rel="noreferrer">Pesquisa</a>
+<a class="quick-link" data-route="account" href="/public/login.html" target="_blank" rel="noreferrer">Conta</a>
+</section>
+<section class="page is-active" id="dashboard-page" data-page-panel>
+<div class="hero-card">
+<div>
+<p class="eyebrow">Resumo geral</p>
+<h3>Controla o catalogo, os pedidos e a base de clientes num unico painel.</h3>
+<p class="hero-copy">Os dados abaixo sao carregados em tempo real a partir da API administrativa existente.</p>
+<p class="hero-meta" id="last-sync">Ultima atualizacao: ainda sem sincronizacao</p>
+</div>
+<div class="hero-actions">
+<button type="button" class="btn btn-primary" id="hero-add-product">Novo produto</button>
+<button type="button" class="btn btn-secondary" data-open-page="orders">Ver pedidos</button>
+<button type="button" class="btn btn-secondary" id="hero-add-customer">Novo cliente</button>
+</div>
+</div>
+<div class="stats-grid">
+<article class="stat-card"><span class="stat-label">Produtos ativos</span><p class="stat-value" id="stat-total-products">0</p><span class="stat-foot">Catalogo disponivel para venda</span></article>
+<article class="stat-card"><span class="stat-label">Pedidos pendentes</span><p class="stat-value" id="stat-pending-orders">0</p><span class="stat-foot">Pedidos que ainda precisam de acao</span></article>
+<article class="stat-card"><span class="stat-label">Receita acumulada</span><p class="stat-value" id="stat-total-sales">AOA 0</p><span class="stat-foot">Soma de pedidos nao cancelados</span></article>
+<article class="stat-card"><span class="stat-label">Clientes ativos</span><p class="stat-value" id="stat-active-customers">0</p><span class="stat-foot">Contas com acesso ativo</span></article>
+</div>
+<div class="dashboard-grid">
+<article class="panel-card">
+<div class="panel-head"><div><p class="panel-kicker">Fila operacional</p><h3>Pedidos recentes</h3></div><button type="button" class="text-action" data-open-page="orders">Abrir pagina</button></div>
+<div id="recent-orders-list" class="stack-list"></div>
+</article>
+<article class="panel-card">
+<div class="panel-head"><div><p class="panel-kicker">Catalogo</p><h3>Produtos em destaque</h3></div><button type="button" class="text-action" data-open-page="products">Ver todos</button></div>
+<div id="top-products-list" class="stack-list"></div>
+</article>
+<article class="panel-card panel-span-two">
+<div class="panel-head"><div><p class="panel-kicker">Indicadores</p><h3>Resumo operacional</h3></div><button type="button" class="text-action" data-open-page="analytics">Abrir analytics</button></div>
+<div id="analytics-overview" class="metric-list"></div>
+</article>
+</div>
+</section>
+<section class="page" id="products-page" data-page-panel>
+<div class="section-head">
+<div><p class="eyebrow">Catalogo</p><h3>Gerir produtos</h3></div>
+<div class="section-actions">
+<label class="search-field"><span>Pesquisar</span><input type="search" id="products-search" placeholder="Nome, descricao ou categoria"></label>
+<button type="button" class="btn btn-primary" id="open-product-create">Adicionar produto</button>
+</div>
+</div>
+<div class="table-card">
+<div class="table-toolbar"><p id="products-summary">0 produtos ativos</p><button type="button" class="btn btn-ghost" id="reload-products">Recarregar</button></div>
+<div class="table-scroll">
+<table>
+<thead><tr><th>Produto</th><th>Categoria</th><th>Preco</th><th>Stock</th><th>Status</th><th>Acoes</th></tr></thead>
+<tbody id="products-tbody"></tbody>
+</table>
+</div>
+<div class="empty-state hidden" id="products-empty"><h4>Nenhum produto encontrado</h4><p>Ajusta a pesquisa ou cria um novo item.</p></div>
+</div>
+</section>
+<section class="page" id="orders-page" data-page-panel>
+<div class="section-head">
+<div><p class="eyebrow">Operacao</p><h3>Gerir pedidos</h3></div>
+<div class="section-actions section-actions-wide">
+<label class="search-field"><span>Pesquisar</span><input type="search" id="orders-search" placeholder="ID, cliente ou email"></label>
+<label class="search-field search-field-select"><span>Status</span><select id="orders-filter"><option value="all">Todos</option><option value="pending">Pendentes</option><option value="processing">Processando</option><option value="completed">Concluidos</option><option value="cancelled">Cancelados</option></select></label>
+</div>
+</div>
+<div class="table-card">
+<div class="table-toolbar"><p id="orders-summary">0 pedidos carregados</p><button type="button" class="btn btn-ghost" id="reload-orders">Recarregar</button></div>
+<div class="table-scroll">
+<table>
+<thead><tr><th>ID</th><th>Cliente</th><th>Contacto</th><th>Total</th><th>Status</th><th>Data</th><th>Acoes</th></tr></thead>
+<tbody id="orders-tbody"></tbody>
+</table>
+</div>
+<div class="empty-state hidden" id="orders-empty"><h4>Sem pedidos para mostrar</h4><p>Quando surgirem pedidos, esta lista sera preenchida aqui.</p></div>
+</div>
+</section>
+<section class="page" id="customers-page" data-page-panel>
+<div class="section-head">
+<div><p class="eyebrow">Clientes</p><h3>Gerir contas de cliente</h3></div>
+<div class="section-actions section-actions-wide">
+<label class="search-field"><span>Pesquisar</span><input type="search" id="customers-search" placeholder="Nome, utilizador ou email"></label>
+<label class="search-field search-field-select"><span>Estado</span><select id="customers-filter"><option value="all">Todos</option><option value="active">Ativos</option><option value="inactive">Inativos</option></select></label>
+<button type="button" class="btn btn-primary" id="open-customer-create">Novo cliente</button>
+</div>
+</div>
+<div class="table-card">
+<div class="table-toolbar"><p id="customers-summary">0 clientes carregados</p><button type="button" class="btn btn-ghost" id="reload-customers">Recarregar</button></div>
+<div class="table-scroll">
+<table>
+<thead><tr><th>Cliente</th><th>Contacto</th><th>Pedidos</th><th>Total gasto</th><th>Status</th><th>Acoes</th></tr></thead>
+<tbody id="customers-tbody"></tbody>
+</table>
+</div>
+<div class="empty-state hidden" id="customers-empty"><h4>Nenhum cliente encontrado</h4><p>Cria uma conta manualmente ou limpa os filtros atuais.</p></div>
+</div>
+</section>
+<section class="page" id="analytics-page" data-page-panel>
+<div class="section-head">
+<div><p class="eyebrow">Leitura rapida</p><h3>Analytics do negocio</h3></div>
+<button type="button" class="btn btn-secondary" id="analytics-refresh">Atualizar analytics</button>
+</div>
+<div class="stats-grid analytics-grid-top">
+<article class="stat-card compact-stat"><span class="stat-label">Total de pedidos</span><p class="stat-value" id="analytics-total-orders">0</p><span class="stat-foot">Todos os pedidos registados</span></article>
+<article class="stat-card compact-stat"><span class="stat-label">Ticket medio</span><p class="stat-value" id="analytics-average-ticket">AOA 0</p><span class="stat-foot">Media por pedido valido</span></article>
+<article class="stat-card compact-stat"><span class="stat-label">Receita deste mes</span><p class="stat-value" id="analytics-month-revenue">AOA 0</p><span class="stat-foot">Pedidos concluidos no mes atual</span></article>
+<article class="stat-card compact-stat"><span class="stat-label">Stock baixo</span><p class="stat-value" id="analytics-low-stock">0</p><span class="stat-foot">Produtos com 5 unidades ou menos</span></article>
+</div>
+<div class="analytics-layout">
+<article class="panel-card"><div class="panel-head"><div><p class="panel-kicker">Catalogo</p><h3>Categorias mais representadas</h3></div></div><div id="analytics-category-list" class="stack-list"></div></article>
+<article class="panel-card"><div class="panel-head"><div><p class="panel-kicker">Pedidos</p><h3>Distribuicao por status</h3></div></div><div id="analytics-status-list" class="stack-list"></div></article>
+<article class="panel-card panel-span-two"><div class="panel-head"><div><p class="panel-kicker">Clientes</p><h3>Top clientes por gasto</h3></div></div><div id="top-customers-list" class="stack-list"></div></article>
+</div>
+</section>
+<section class="page" id="settings-page" data-page-panel>
+<div class="section-head"><div><p class="eyebrow">Preferencias</p><h3>Configuracoes da loja</h3></div></div>
+<form id="settings-form" class="panel-card settings-card">
+<p class="settings-copy">Estas configuracoes ainda nao possuem endpoint no backend. O painel guarda estes dados no navegador para manter a area administrativa util enquanto a API dedicada nao existe.</p>
+<div class="form-grid two-columns">
+<label class="field"><span>Nome da loja</span><input type="text" name="store_name" id="settings-store-name" placeholder="Mutanha"></label>
+<label class="field"><span>Email de contacto</span><input type="email" name="contact_email" id="settings-contact-email" placeholder="contato@mutanha.ao"></label>
+<label class="field"><span>Telefone</span><input type="tel" name="contact_phone" id="settings-contact-phone" placeholder="+244 000 000 000"></label>
+<label class="field"><span>Horario de suporte</span><input type="text" name="support_hours" id="settings-support-hours" placeholder="Seg a Sab, 09h00 - 18h00"></label>
+</div>
+<div class="form-grid">
+<label class="field"><span>Morada</span><textarea name="store_address" id="settings-store-address" rows="3" placeholder="Luanda, Angola"></textarea></label>
+<label class="field"><span>Mensagem do painel</span><textarea name="announcement" id="settings-announcement" rows="3" placeholder="Mensagem interna para a equipa"></textarea></label>
+</div>
+<p class="settings-feedback" id="settings-feedback" aria-live="polite"></p>
+<div class="modal-actions"><button type="button" class="btn btn-secondary" id="reset-settings-btn">Restaurar padrao</button><button type="submit" class="btn btn-primary">Guardar configuracoes</button></div>
+</form>
+</section>
+</main>
+</div>
+<div class="modal" id="product-modal" aria-hidden="true">
+<div class="modal-dialog modal-large" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+<div class="modal-header"><div><p class="eyebrow">Catalogo</p><h3 id="product-modal-title">Novo produto</h3></div><button type="button" class="icon-btn" data-close-modal="product-modal" aria-label="Fechar modal">x</button></div>
+<form id="product-form" class="modal-form">
+<input type="hidden" name="product_id" id="product-id">
+<input type="hidden" name="existing_image" id="product-existing-image">
+<div class="form-grid two-columns">
+<label class="field"><span>Nome do produto</span><input type="text" name="name" id="product-name" required></label>
+<label class="field"><span>Categoria</span><select name="category" id="product-category" required><option value="roupas">Roupas</option><option value="acessorios">Acessorios</option><option value="calcados">Calcados</option><option value="equipamentos">Equipamentos</option></select></label>
+</div>
+<label class="field"><span>Descricao</span><textarea name="description" id="product-description" rows="4" placeholder="Detalhes do produto"></textarea></label>
+<div class="form-grid three-columns">
+<label class="field"><span>Preco (AOA)</span><input type="number" name="price" id="product-price" min="0" step="0.01" required></label>
+<label class="field"><span>Stock</span><input type="number" name="stock_quantity" id="product-stock" min="0" step="1" required></label>
+<label class="field"><span>Status</span><select name="status" id="product-status"><option value="active">Ativo</option><option value="inactive">Inativo</option></select></label>
+</div>
+<label class="field"><span>Imagem</span><input type="file" name="image" id="product-image" accept="image/*"><small>JPG, PNG, GIF ou WebP. Maximo recomendado: 5MB.</small></label>
+<div class="preview-card" id="product-preview-card"><img id="product-image-preview" alt="Preview do produto"><p id="product-image-caption">Nenhuma imagem selecionada.</p></div>
+<div class="modal-actions"><button type="button" class="btn btn-secondary" data-close-modal="product-modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar produto</button></div>
+</form>
+</div>
+</div>
+<div class="modal" id="order-modal" aria-hidden="true">
+<div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+<div class="modal-header"><div><p class="eyebrow">Pedido</p><h3 id="order-modal-title">Atualizar pedido</h3></div><button type="button" class="icon-btn" data-close-modal="order-modal" aria-label="Fechar modal">x</button></div>
+<form id="order-form" class="modal-form">
+<input type="hidden" name="order_id" id="order-id">
+<div class="detail-grid">
+<article class="detail-card"><span>Cliente</span><strong id="order-detail-customer">-</strong></article>
+<article class="detail-card"><span>Total</span><strong id="order-detail-total">AOA 0</strong></article>
+<article class="detail-card"><span>Email</span><strong id="order-detail-email">-</strong></article>
+<article class="detail-card"><span>Data</span><strong id="order-detail-date">-</strong></article>
+</div>
+<div class="form-grid two-columns">
+<label class="field"><span>Status</span><select name="status" id="order-status" required><option value="pending">Pendente</option><option value="processing">Processando</option><option value="completed">Concluido</option><option value="cancelled">Cancelado</option></select></label>
+<label class="field"><span>Metodo de pagamento</span><input type="text" name="payment_method" id="order-payment-method" placeholder="Transferencia, cash, cartao..."></label>
+</div>
+<label class="field"><span>Morada de entrega</span><textarea name="shipping_address" id="order-shipping-address" rows="3"></textarea></label>
+<label class="field"><span>Notas</span><textarea name="notes" id="order-notes" rows="3"></textarea></label>
+<div class="modal-actions"><button type="button" class="btn btn-secondary" data-close-modal="order-modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar alteracoes</button></div>
+</form>
+</div>
+</div>
+<div class="modal" id="customer-modal" aria-hidden="true">
+<div class="modal-dialog modal-large" role="dialog" aria-modal="true" aria-labelledby="customer-modal-title">
+<div class="modal-header"><div><p class="eyebrow">Clientes</p><h3 id="customer-modal-title">Novo cliente</h3></div><button type="button" class="icon-btn" data-close-modal="customer-modal" aria-label="Fechar modal">x</button></div>
+<form id="customer-form" class="modal-form">
+<input type="hidden" name="customer_id" id="customer-id">
+<input type="hidden" name="customer_mode" id="customer-mode" value="create">
+<div class="form-grid two-columns">
+<label class="field"><span>Nome completo</span><input type="text" name="full_name" id="customer-full-name" required></label>
+<label class="field"><span>Nome de utilizador</span><input type="text" name="username" id="customer-username" required></label>
+</div>
+<div class="form-grid two-columns">
+<label class="field"><span>Email</span><input type="email" name="email" id="customer-email" required></label>
+<label class="field"><span>Telefone</span><input type="tel" name="phone" id="customer-phone"></label>
+</div>
+<div class="form-grid three-columns">
+<label class="field"><span>Cidade</span><input type="text" name="city" id="customer-city"></label>
+<label class="field"><span>Provincia</span><input type="text" name="state" id="customer-state"></label>
+<label class="field"><span>Codigo postal</span><input type="text" name="zip_code" id="customer-zip-code"></label>
+</div>
+<label class="field"><span>Morada</span><textarea name="address" id="customer-address" rows="3"></textarea></label>
+<label class="field" id="customer-password-group"><span>Senha inicial</span><input type="password" name="password" id="customer-password" autocomplete="new-password"><small>Obrigatoria apenas na criacao do cliente.</small></label>
+<label class="checkbox-field" id="customer-active-field"><input type="checkbox" id="customer-is-active" checked><span>Conta ativa</span></label>
+<div class="modal-actions"><button type="button" class="btn btn-secondary" data-close-modal="customer-modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar cliente</button></div>
+</form>
+</div>
+</div>
+<div class="toast-stack" id="toast-stack" aria-live="polite" aria-atomic="true"></div>
 </body>
-</html> 
+</html>

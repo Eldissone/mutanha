@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -11,6 +11,10 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET;
+const frontendDir = path.join(__dirname, '../frontend');
+const frontendPublicDir = path.join(frontendDir, 'public');
+const frontendSrcDir = path.join(frontendDir, 'src');
+const adminDir = path.join(frontendDir, 'admin');
 
 if (!JWT_SECRET) {
     throw new Error('JWT_SECRET nao definido. Configure a variavel de ambiente antes de iniciar o servidor.');
@@ -37,37 +41,42 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir arquivos estáticos
+// Servir arquivos estÃ¡ticos
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/admin', express.static(path.join(__dirname, '../frontend/admin')));
+app.use('/admin', express.static(adminDir));
+app.use('/public', express.static(frontendPublicDir));
+app.use('/src', express.static(frontendSrcDir));
+app.get('/index.html', (req, res) => {
+    res.sendFile(path.join(frontendDir, 'index.html'));
+});
 
-// Configuração do banco de dados PostgreSQL
+// ConfiguraÃ§Ã£o do banco de dados PostgreSQL
 
-// Criar pasta uploads se não existir
+// Criar pasta uploads se nÃ£o existir
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Middleware de autenticação
+// Middleware de autenticaÃ§Ã£o
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-        return res.status(401).json({ error: 'Token de acesso necessário' });
+        return res.status(401).json({ error: 'Token de acesso necessÃ¡rio' });
     }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
-            return res.status(403).json({ error: 'Token inválido' });
+            return res.status(403).json({ error: 'Token invÃ¡lido' });
         }
         req.user = user;
         next();
     });
 };
 
-// Rotas de autenticação
+// Rotas de autenticaÃ§Ã£o
 const authenticateUser = authenticateToken;
 
 const requireRole = (...allowedRoles) => (req, res, next) => {
@@ -82,14 +91,14 @@ app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
 
-        // Buscar usuário no banco de dados
+        // Buscar usuÃ¡rio no banco de dados
         const result = await pool.query(
             'SELECT * FROM users WHERE username = $1',
             [username]
         );
 
         if (result.rows.length === 0) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+            return res.status(401).json({ error: 'Credenciais invÃ¡lidas' });
         }
 
         const user = result.rows[0];
@@ -98,7 +107,7 @@ app.post('/api/login', async (req, res) => {
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+            return res.status(401).json({ error: 'Credenciais invÃ¡lidas' });
         }
 
         // Gerar token JWT
@@ -153,7 +162,7 @@ const upload = multer({
         if (mimetype && extname) {
             return cb(null, true);
         } else {
-            cb(new Error('Apenas imagens são permitidas!'));
+            cb(new Error('Apenas imagens sÃ£o permitidas!'));
         }
     }
 });
@@ -189,7 +198,7 @@ app.get('/api/products', authenticateToken, requireRole('admin'), async (req, re
     }
 });
 
-// Rota pública para produtos (sem autenticação)
+// Rota pÃºblica para produtos (sem autenticaÃ§Ã£o)
 app.get('/api/public/products', async (req, res) => {
     try {
         const result = await pool.query(
@@ -197,12 +206,12 @@ app.get('/api/public/products', async (req, res) => {
         );
         res.json(result.rows);
     } catch (error) {
-        console.error('Erro ao buscar produtos públicos:', error);
+        console.error('Erro ao buscar produtos pÃºblicos:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
-// Rota para todos os produtos (pública)
+// Rota para todos os produtos (pÃºblica)
 app.get('/api/public/all-products', async (req, res) => {
     try {
         const result = await pool.query(
@@ -215,30 +224,30 @@ app.get('/api/public/all-products', async (req, res) => {
     }
 });
 
-// Rotas para usuários normais
+// Rotas para usuÃ¡rios normais
 app.post('/api/register', async (req, res) => {
     try {
         const { username, email, password, full_name, phone, address, city, state, zip_code } = req.body;
         
-        // Validação básica
+        // ValidaÃ§Ã£o bÃ¡sica
         if (!username || !email || !password || !full_name) {
-            return res.status(400).json({ error: 'Todos os campos obrigatórios devem ser preenchidos' });
+            return res.status(400).json({ error: 'Todos os campos obrigatÃ³rios devem ser preenchidos' });
         }
         
-        // Verificar se usuário já existe
+        // Verificar se usuÃ¡rio jÃ¡ existe
         const existingUser = await pool.query(
             'SELECT id FROM user_accounts WHERE username = $1 OR email = $2',
             [username, email]
         );
         
         if (existingUser.rows.length > 0) {
-            return res.status(400).json({ error: 'Usuário ou email já existe' });
+            return res.status(400).json({ error: 'UsuÃ¡rio ou email jÃ¡ existe' });
         }
         
         // Hash da senha
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        // Criar usuário
+        // Criar usuÃ¡rio
         const result = await pool.query(
             'INSERT INTO user_accounts (username, email, password, full_name, phone, address, city, state, zip_code) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, username, email, full_name, role',
             [username, email, hashedPassword, full_name, phone || null, address || null, city || null, state || null, zip_code || null]
@@ -261,7 +270,7 @@ app.post('/api/register', async (req, res) => {
             user: result.rows[0]
         });
     } catch (error) {
-        console.error('Erro ao registrar usuário:', error);
+        console.error('Erro ao registrar usuÃ¡rio:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
@@ -287,7 +296,7 @@ app.post('/api/user/login', async (req, res) => {
             );
 
             if (adminResult.rows.length === 0) {
-                return res.status(401).json({ error: 'Credenciais inválidas' });
+                return res.status(401).json({ error: 'Credenciais invÃ¡lidas' });
             }
 
             user = adminResult.rows[0];
@@ -297,7 +306,7 @@ app.post('/api/user/login', async (req, res) => {
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
-            return res.status(401).json({ error: 'Credenciais inválidas' });
+            return res.status(401).json({ error: 'Credenciais invÃ¡lidas' });
         }
 
         const token = jwt.sign(
@@ -323,11 +332,11 @@ app.post('/api/user/login', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Erro no login do usuário:', error);
+        console.error('Erro no login do usuÃ¡rio:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
-// Middleware para autenticar usuários normais
+// Middleware para autenticar usuÃ¡rios normais
 // Rotas do carrinho
 app.post('/api/cart/add', authenticateUser, async (req, res) => {
     try {
@@ -351,13 +360,13 @@ app.post('/api/cart/add', authenticateUser, async (req, res) => {
         );
         
         if (productResult.rows.length === 0) {
-            return res.status(404).json({ error: 'Produto não encontrado' });
+            return res.status(404).json({ error: 'Produto nÃ£o encontrado' });
         }
         
         const product = productResult.rows[0];
         
         if (Number(product.stock_quantity) < requestedQuantity) {
-            return res.status(400).json({ error: 'Quantidade solicitada não disponível em estoque' });
+            return res.status(400).json({ error: 'Quantidade solicitada nÃ£o disponÃ­vel em estoque' });
         }
         
         // Buscar ou criar carrinho
@@ -377,7 +386,7 @@ app.post('/api/cart/add', authenticateUser, async (req, res) => {
             cart_id = cartResult.rows[0].id;
         }
         
-        // Verificar se item já existe no carrinho
+        // Verificar se item jÃ¡ existe no carrinho
         const existingItem = await pool.query(
             'SELECT id, quantity FROM cart_items WHERE cart_id = $1 AND product_id = $2',
             [cart_id, parsedProductId]
@@ -448,7 +457,7 @@ app.put('/api/cart/update/:item_id', authenticateUser, async (req, res) => {
             return res.status(400).json({ error: 'Quantidade deve ser maior que zero' });
         }
         
-        // Verificar se item pertence ao usuário
+        // Verificar se item pertence ao usuÃ¡rio
         const itemResult = await pool.query(`
             SELECT ci.id, p.stock_quantity 
             FROM cart_items ci
@@ -458,11 +467,11 @@ app.put('/api/cart/update/:item_id', authenticateUser, async (req, res) => {
         `, [item_id, user_id]);
         
         if (itemResult.rows.length === 0) {
-            return res.status(404).json({ error: 'Item não encontrado' });
+            return res.status(404).json({ error: 'Item nÃ£o encontrado' });
         }
         
         if (itemResult.rows[0].stock_quantity < quantity) {
-            return res.status(400).json({ error: 'Quantidade solicitada não disponível em estoque' });
+            return res.status(400).json({ error: 'Quantidade solicitada nÃ£o disponÃ­vel em estoque' });
         }
         
         await pool.query(
@@ -482,7 +491,7 @@ app.delete('/api/cart/remove/:item_id', authenticateUser, async (req, res) => {
         const { item_id } = req.params;
         const user_id = req.user.id;
         
-        // Verificar se item pertence ao usuário
+        // Verificar se item pertence ao usuÃ¡rio
         const itemResult = await pool.query(`
             SELECT ci.id FROM cart_items ci
             JOIN shopping_carts sc ON ci.cart_id = sc.id
@@ -490,7 +499,7 @@ app.delete('/api/cart/remove/:item_id', authenticateUser, async (req, res) => {
         `, [item_id, user_id]);
         
         if (itemResult.rows.length === 0) {
-            return res.status(404).json({ error: 'Item não encontrado' });
+            return res.status(404).json({ error: 'Item nÃ£o encontrado' });
         }
         
         await pool.query('DELETE FROM cart_items WHERE id = $1', [item_id]);
@@ -615,7 +624,7 @@ app.get('/api/user/orders', authenticateUser, async (req, res) => {
         
         res.json(result.rows);
     } catch (error) {
-        console.error('Erro ao buscar pedidos do usuário:', error);
+        console.error('Erro ao buscar pedidos do usuÃ¡rio:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
@@ -624,21 +633,21 @@ app.post('/api/products', authenticateToken, requireRole('admin'), async (req, r
     try {
         const { name, description, category, price, stock_quantity, image } = req.body;
         
-        // Validação dos campos obrigatórios
+        // ValidaÃ§Ã£o dos campos obrigatÃ³rios
         if (!name || !price) {
-            return res.status(400).json({ error: 'Nome e preço são obrigatórios' });
+            return res.status(400).json({ error: 'Nome e preÃ§o sÃ£o obrigatÃ³rios' });
         }
         
-        // Converter e validar valores numéricos
+        // Converter e validar valores numÃ©ricos
         const priceValue = parseFloat(price);
         const stockValue = parseInt(stock_quantity) || 0;
         
         if (isNaN(priceValue) || priceValue < 0) {
-            return res.status(400).json({ error: 'Preço deve ser um número válido maior que zero' });
+            return res.status(400).json({ error: 'PreÃ§o deve ser um nÃºmero vÃ¡lido maior que zero' });
         }
         
         if (isNaN(stockValue) || stockValue < 0) {
-            return res.status(400).json({ error: 'Quantidade em estoque deve ser um número válido maior ou igual a zero' });
+            return res.status(400).json({ error: 'Quantidade em estoque deve ser um nÃºmero vÃ¡lido maior ou igual a zero' });
         }
         
         const result = await pool.query(
@@ -658,21 +667,21 @@ app.put('/api/products/:id', authenticateToken, requireRole('admin'), async (req
         const { id } = req.params;
         const { name, description, category, price, stock_quantity, image, status } = req.body;
         
-        // Validação dos campos obrigatórios
+        // ValidaÃ§Ã£o dos campos obrigatÃ³rios
         if (!name || !price) {
-            return res.status(400).json({ error: 'Nome e preço são obrigatórios' });
+            return res.status(400).json({ error: 'Nome e preÃ§o sÃ£o obrigatÃ³rios' });
         }
         
-        // Converter e validar valores numéricos
+        // Converter e validar valores numÃ©ricos
         const priceValue = parseFloat(price);
         const stockValue = parseInt(stock_quantity) || 0;
         
         if (isNaN(priceValue) || priceValue < 0) {
-            return res.status(400).json({ error: 'Preço deve ser um número válido maior que zero' });
+            return res.status(400).json({ error: 'PreÃ§o deve ser um nÃºmero vÃ¡lido maior que zero' });
         }
         
         if (isNaN(stockValue) || stockValue < 0) {
-            return res.status(400).json({ error: 'Quantidade em estoque deve ser um número válido maior ou igual a zero' });
+            return res.status(400).json({ error: 'Quantidade em estoque deve ser um nÃºmero vÃ¡lido maior ou igual a zero' });
         }
         
         // Determinar se o produto deve estar ativo baseado no status
@@ -684,7 +693,7 @@ app.put('/api/products/:id', authenticateToken, requireRole('admin'), async (req
         );
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Produto não encontrado' });
+            return res.status(404).json({ error: 'Produto nÃ£o encontrado' });
         }
         
         res.json(result.rows[0]);
@@ -704,10 +713,10 @@ app.delete('/api/products/:id', authenticateToken, requireRole('admin'), async (
         );
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Produto não encontrado' });
+            return res.status(404).json({ error: 'Produto nÃ£o encontrado' });
         }
         
-        res.json({ message: 'Produto excluído com sucesso' });
+        res.json({ message: 'Produto excluÃ­do com sucesso' });
     } catch (error) {
         console.error('Erro ao excluir produto:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
@@ -754,7 +763,7 @@ app.put('/api/orders/:id', authenticateToken, requireRole('admin'), async (req, 
         );
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Pedido não encontrado' });
+            return res.status(404).json({ error: 'Pedido nÃ£o encontrado' });
         }
         
         res.json(result.rows[0]);
@@ -774,17 +783,17 @@ app.delete('/api/orders/:id', authenticateToken, requireRole('admin'), async (re
         );
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Pedido não encontrado' });
+            return res.status(404).json({ error: 'Pedido nÃ£o encontrado' });
         }
         
-        res.json({ message: 'Pedido excluído com sucesso' });
+        res.json({ message: 'Pedido excluÃ­do com sucesso' });
     } catch (error) {
         console.error('Erro ao excluir pedido:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
-// Rotas de clientes (usuários normais)
+// Rotas de clientes (usuÃ¡rios normais)
 app.get('/api/customers', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const result = await pool.query(`
@@ -845,7 +854,7 @@ app.put('/api/customers/:id', authenticateToken, requireRole('admin'), async (re
         );
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Cliente não encontrado' });
+            return res.status(404).json({ error: 'Cliente nÃ£o encontrado' });
         }
         
         res.json(result.rows[0]);
@@ -866,7 +875,7 @@ app.delete('/api/customers/:id', authenticateToken, requireRole('admin'), async 
         );
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Cliente não encontrado' });
+            return res.status(404).json({ error: 'Cliente nÃ£o encontrado' });
         }
         
         res.json({ message: 'Cliente desativado com sucesso' });
@@ -876,7 +885,7 @@ app.delete('/api/customers/:id', authenticateToken, requireRole('admin'), async 
     }
 });
 
-// Rota para estatísticas do dashboard
+// Rota para estatÃ­sticas do dashboard
 app.get('/api/dashboard/stats', authenticateToken, requireRole('admin'), async (req, res) => {
     try {
         const [productsResult, ordersResult, customersResult, salesResult] = await Promise.all([
@@ -893,7 +902,7 @@ app.get('/api/dashboard/stats', authenticateToken, requireRole('admin'), async (
             activeCustomers: parseInt(customersResult.rows[0].total)
         });
     } catch (error) {
-        console.error('Erro ao buscar estatísticas:', error);
+        console.error('Erro ao buscar estatÃ­sticas:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
@@ -929,7 +938,7 @@ app.get('/admin/*', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/admin/index.html'));
 });
 
-// Rota padrão
+// Rota padrÃ£o
 app.get('/', (req, res) => {
     res.json({
         message: 'API mutanha Backend',
@@ -953,8 +962,9 @@ app.use((error, req, res, next) => {
 
 // Iniciar servidor
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📁 Uploads: http://localhost:${PORT}/uploads`);
-    console.log(`🔐 Admin: http://localhost:${PORT}/admin`);
-    console.log(`📊 API: http://localhost:${PORT}/api`);
+    console.log(`ðŸš€ Servidor rodando na porta ${PORT}`);
+    console.log(`ðŸ“ Uploads: http://localhost:${PORT}/uploads`);
+    console.log(`ðŸ” Admin: http://localhost:${PORT}/admin`);
+    console.log(`ðŸ“Š API: http://localhost:${PORT}/api`);
 }); 
+

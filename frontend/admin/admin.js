@@ -1,589 +1,1012 @@
-// Configuração da API
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
+﻿const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3000/api`;
 const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
-let authToken = localStorage.getItem('authToken');
+const LOGIN_REDIRECT_PATH = '/admin/index.html';
+const SETTINGS_KEY = 'mutanha_admin_settings';
+const VALID_PAGES = new Set(['dashboard', 'products', 'orders', 'customers', 'analytics', 'settings']);
+const DEFAULT_SETTINGS = {
+  store_name: 'Mutanha',
+  contact_email: 'contato@mutanha.ao',
+  contact_phone: '+244 000 000 000',
+  support_hours: 'Seg a Sab, 09h00 - 18h00',
+  store_address: 'Luanda, Angola',
+  announcement: 'Revise o dashboard no inicio e fim de cada turno.'
+};
+const PLACEHOLDER_IMAGE = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 240'><rect width='320' height='240' fill='%23f5ede6'/><rect x='24' y='24' width='272' height='192' rx='18' fill='%23e6d8c9'/><circle cx='118' cy='102' r='34' fill='%23f59e0b'/><path d='M56 194l56-58 44 44 32-30 76 44H56z' fill='%23864f25'/><text x='160' y='222' text-anchor='middle' fill='%23532f17' font-family='sans-serif' font-size='18'>Mutanha</text></svg>")}`;
 
-// Dados mockados para demonstração (serão substituídos pela API)
-let products = [];
-let orders = [];
-let customers = [];
+const state = {
+  authToken: localStorage.getItem('authToken'),
+  currentPage: 'dashboard',
+  stats: { totalProducts: 0, pendingOrders: 0, totalSales: 0, activeCustomers: 0 },
+  products: [],
+  orders: [],
+  customers: [],
+  recentOrders: [],
+  topProducts: [],
+  settings: loadSettings(),
+  lastSync: null
+};
 
-function getImageUrl(imagePath) {
-    if (!imagePath) return `${API_ORIGIN}/uploads/default-product.jpg`;
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
-    return `${API_ORIGIN}${imagePath}`;
+const elements = {};
+
+document.addEventListener('DOMContentLoaded', init);
+
+async function init() {
+  cacheElements();
+  setupSiteLinks();
+  bindStaticEvents();
+  hydrateSettingsForm();
+  syncSessionIdentity();
+  showPage(getPageFromHash(), { updateHash: false });
+
+  if (!await checkAuth()) {
+    return;
+  }
+
+  await refreshAllData({ notify: false });
+}
+
+function cacheElements() {
+  elements.navLinks = [...document.querySelectorAll('.nav-link')];
+  elements.pages = [...document.querySelectorAll('[data-page-panel]')];
+  elements.pageTitle = document.getElementById('page-title');
+  elements.sidebar = document.getElementById('admin-sidebar');
+  elements.sidebarOpenBtn = document.getElementById('sidebar-open-btn');
+  elements.sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+  elements.sidebarBackdrop = document.getElementById('admin-backdrop');
+  elements.refreshBtn = document.getElementById('refresh-btn');
+  elements.logoutBtn = document.getElementById('logout-btn');
+  elements.lastSync = document.getElementById('last-sync');
+  elements.sessionUser = document.getElementById('session-user');
+  elements.sessionStatus = document.getElementById('session-status');
+  elements.toastStack = document.getElementById('toast-stack');
+
+  elements.productsSearch = document.getElementById('products-search');
+  elements.productsSummary = document.getElementById('products-summary');
+  elements.productsTbody = document.getElementById('products-tbody');
+  elements.productsEmpty = document.getElementById('products-empty');
+  elements.reloadProducts = document.getElementById('reload-products');
+
+  elements.ordersSearch = document.getElementById('orders-search');
+  elements.ordersFilter = document.getElementById('orders-filter');
+  elements.ordersSummary = document.getElementById('orders-summary');
+  elements.ordersTbody = document.getElementById('orders-tbody');
+  elements.ordersEmpty = document.getElementById('orders-empty');
+  elements.reloadOrders = document.getElementById('reload-orders');
+
+  elements.customersSearch = document.getElementById('customers-search');
+  elements.customersFilter = document.getElementById('customers-filter');
+  elements.customersSummary = document.getElementById('customers-summary');
+  elements.customersTbody = document.getElementById('customers-tbody');
+  elements.customersEmpty = document.getElementById('customers-empty');
+  elements.reloadCustomers = document.getElementById('reload-customers');
+
+  elements.recentOrdersList = document.getElementById('recent-orders-list');
+  elements.topProductsList = document.getElementById('top-products-list');
+  elements.analyticsOverview = document.getElementById('analytics-overview');
+  elements.analyticsCategoryList = document.getElementById('analytics-category-list');
+  elements.analyticsStatusList = document.getElementById('analytics-status-list');
+  elements.topCustomersList = document.getElementById('top-customers-list');
+
+  elements.productModal = document.getElementById('product-modal');
+  elements.productForm = document.getElementById('product-form');
+  elements.productModalTitle = document.getElementById('product-modal-title');
+  elements.productId = document.getElementById('product-id');
+  elements.productExistingImage = document.getElementById('product-existing-image');
+  elements.productImageInput = document.getElementById('product-image');
+  elements.productImagePreview = document.getElementById('product-image-preview');
+  elements.productImageCaption = document.getElementById('product-image-caption');
+
+  elements.orderModal = document.getElementById('order-modal');
+  elements.orderForm = document.getElementById('order-form');
+  elements.orderId = document.getElementById('order-id');
+
+  elements.customerModal = document.getElementById('customer-modal');
+  elements.customerForm = document.getElementById('customer-form');
+  elements.customerModalTitle = document.getElementById('customer-modal-title');
+  elements.customerId = document.getElementById('customer-id');
+  elements.customerMode = document.getElementById('customer-mode');
+  elements.customerPasswordGroup = document.getElementById('customer-password-group');
+  elements.customerPassword = document.getElementById('customer-password');
+  elements.customerActiveField = document.getElementById('customer-active-field');
+  elements.customerIsActive = document.getElementById('customer-is-active');
+
+  elements.settingsForm = document.getElementById('settings-form');
+  elements.settingsFeedback = document.getElementById('settings-feedback');
+}
+
+function bindStaticEvents() {
+  elements.navLinks.forEach((link) => {
+    link.addEventListener('click', () => showPage(link.dataset.page));
+  });
+
+  document.querySelectorAll('[data-open-page]').forEach((button) => {
+    button.addEventListener('click', () => showPage(button.dataset.openPage));
+  });
+
+  document.querySelectorAll('[data-close-modal]').forEach((button) => {
+    button.addEventListener('click', () => closeModal(button.dataset.closeModal));
+  });
+
+  document.querySelectorAll('.modal').forEach((modal) => {
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeModal(modal.id);
+      }
+    });
+  });
+
+  window.addEventListener('hashchange', () => showPage(getPageFromHash(), { updateHash: false }));
+  document.addEventListener('keydown', handleGlobalKeydown);
+
+  elements.sidebarOpenBtn?.addEventListener('click', () => toggleSidebar(true));
+  elements.sidebarCloseBtn?.addEventListener('click', () => toggleSidebar(false));
+  elements.sidebarBackdrop?.addEventListener('click', () => toggleSidebar(false));
+  elements.refreshBtn?.addEventListener('click', () => refreshAllData());
+  elements.reloadProducts?.addEventListener('click', () => refreshAllData());
+  elements.reloadOrders?.addEventListener('click', () => refreshAllData());
+  elements.reloadCustomers?.addEventListener('click', () => refreshAllData());
+  document.getElementById('analytics-refresh')?.addEventListener('click', () => refreshAllData());
+  elements.logoutBtn?.addEventListener('click', logout);
+
+  document.getElementById('hero-add-product')?.addEventListener('click', () => openProductModal());
+  document.getElementById('open-product-create')?.addEventListener('click', () => openProductModal());
+  document.getElementById('hero-add-customer')?.addEventListener('click', () => openCustomerModal());
+  document.getElementById('open-customer-create')?.addEventListener('click', () => openCustomerModal());
+
+  elements.productsSearch?.addEventListener('input', renderProductsTable);
+  elements.ordersSearch?.addEventListener('input', renderOrdersTable);
+  elements.ordersFilter?.addEventListener('change', renderOrdersTable);
+  elements.customersSearch?.addEventListener('input', renderCustomersTable);
+  elements.customersFilter?.addEventListener('change', renderCustomersTable);
+  elements.productImageInput?.addEventListener('change', previewSelectedImage);
+
+  elements.productsTbody?.addEventListener('click', handleProductsTableClick);
+  elements.ordersTbody?.addEventListener('click', handleOrdersTableClick);
+  elements.customersTbody?.addEventListener('click', handleCustomersTableClick);
+
+  elements.productForm?.addEventListener('submit', handleProductSubmit);
+  elements.orderForm?.addEventListener('submit', handleOrderSubmit);
+  elements.customerForm?.addEventListener('submit', handleCustomerSubmit);
+  elements.settingsForm?.addEventListener('submit', handleSettingsSubmit);
+  document.getElementById('reset-settings-btn')?.addEventListener('click', resetSettingsForm);
+}
+function setupSiteLinks() {
+  const routes = {
+    home: '/index.html',
+    shop: '/public/roupas.html',
+    accessories: '/public/acess.html',
+    search: '/public/search.html',
+    account: '/public/login.html'
+  };
+
+  document.querySelectorAll('[data-route]').forEach((link) => {
+    const href = routes[link.dataset.route];
+    if (href) {
+      link.href = buildSiteUrl(href);
+    }
+  });
+}
+
+function buildSiteUrl(path) {
+  return new URL(path, `${window.location.origin}/`).toString();
+}
+
+function showPage(page, options = {}) {
+  const nextPage = VALID_PAGES.has(page) ? page : 'dashboard';
+  const updateHash = options.updateHash !== false;
+  state.currentPage = nextPage;
+
+  elements.navLinks.forEach((link) => {
+    const isActive = link.dataset.page === nextPage;
+    link.classList.toggle('is-active', isActive);
+  });
+
+  elements.pages.forEach((section) => {
+    section.classList.toggle('is-active', section.id === `${nextPage}-page`);
+  });
+
+  const activeLink = elements.navLinks.find((link) => link.dataset.page === nextPage);
+  elements.pageTitle.textContent = activeLink?.dataset.title || 'Dashboard';
+  if (updateHash) {
+    window.location.hash = nextPage;
+  }
+  toggleSidebar(false);
+}
+
+function getPageFromHash() {
+  const hash = window.location.hash.replace('#', '').trim();
+  return VALID_PAGES.has(hash) ? hash : 'dashboard';
+}
+
+function toggleSidebar(forceOpen) {
+  if (!elements.sidebar) return;
+  const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !elements.sidebar.classList.contains('is-open');
+  elements.sidebar.classList.toggle('is-open', shouldOpen);
+  elements.sidebarBackdrop?.classList.toggle('is-visible', shouldOpen);
+}
+
+function handleGlobalKeydown(event) {
+  if (event.key === 'Escape') {
+    document.querySelectorAll('.modal.is-open').forEach((modal) => closeModal(modal.id));
+    toggleSidebar(false);
+  }
+}
+
+async function checkAuth() {
+  const isAdminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+  if (!isAdminLoggedIn || !state.authToken) {
+    clearAdminSession();
+    redirectToLogin();
+    return false;
+  }
+
+  try {
+    await apiRequest('/dashboard/stats', { skipNotification: true });
+    return true;
+  } catch (error) {
+    console.error('Sessao admin invalida:', error);
+    return false;
+  }
+}
+
+async function refreshAllData(options = {}) {
+  const notify = options.notify !== false;
+  setLoadingState(true);
+
+  try {
+    const [stats, products, orders, customers, recentOrders, topProducts] = await Promise.all([
+      apiRequest('/dashboard/stats', { skipNotification: true }),
+      apiRequest('/products', { skipNotification: true }),
+      apiRequest('/orders', { skipNotification: true }),
+      apiRequest('/customers', { skipNotification: true }),
+      apiRequest('/dashboard/recent-orders', { skipNotification: true }),
+      apiRequest('/dashboard/top-products', { skipNotification: true })
+    ]);
+
+    state.stats = stats;
+    state.products = products;
+    state.orders = orders;
+    state.customers = customers;
+    state.recentOrders = recentOrders;
+    state.topProducts = topProducts;
+    state.lastSync = new Date();
+
+    renderDashboard();
+    renderProductsTable();
+    renderOrdersTable();
+    renderCustomersTable();
+    renderAnalytics();
+    updateLastSyncLabel();
+
+    if (notify) {
+      showToast('Dados atualizados com sucesso.', 'success');
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar painel:', error);
+    if (notify) {
+      showToast('Nao foi possivel atualizar os dados agora.', 'error');
+    }
+  } finally {
+    setLoadingState(false);
+  }
+}
+
+async function apiRequest(endpoint, options = {}) {
+  const requestOptions = { ...options };
+  const skipNotification = Boolean(requestOptions.skipNotification);
+  delete requestOptions.skipNotification;
+
+  if (!state.authToken) {
+    clearAdminSession();
+    redirectToLogin();
+    throw new Error('Sessao admin ausente');
+  }
+
+  const isFormData = requestOptions.body instanceof FormData;
+  const headers = {
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    ...(requestOptions.headers || {}),
+    Authorization: `Bearer ${state.authToken}`
+  };
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...requestOptions,
+    headers
+  });
+
+  const contentType = response.headers.get('content-type') || '';
+  const payload = contentType.includes('application/json')
+    ? await response.json().catch(() => ({}))
+    : await response.text().catch(() => '');
+
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      clearAdminSession();
+      redirectToLogin();
+      throw new Error('Sessao expirada');
+    }
+
+    const message = typeof payload === 'object' && payload?.error ? payload.error : `HTTP ${response.status}`;
+    if (!skipNotification) {
+      showToast(message, 'error');
+    }
+    throw new Error(message);
+  }
+
+  return payload;
+}
+
+async function uploadImage(file) {
+  if (!file || !file.size) {
+    return '';
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('A imagem deve ter no maximo 5MB.');
+  }
+
+  const formData = new FormData();
+  formData.append('image', file);
+  const payload = await apiRequest('/upload-image', {
+    method: 'POST',
+    body: formData,
+    skipNotification: true
+  });
+  return payload.imageUrl || '';
+}
+
+function setLoadingState(isLoading) {
+  document.body.classList.toggle('is-loading', isLoading);
+  if (elements.refreshBtn) {
+    elements.refreshBtn.disabled = isLoading;
+    elements.refreshBtn.textContent = isLoading ? 'A atualizar...' : 'Atualizar dados';
+  }
+}
+
+function syncSessionIdentity() {
+  const tokenData = decodeJwt(state.authToken);
+  const username = tokenData?.username || 'Administrador';
+  if (elements.sessionUser) {
+    elements.sessionUser.textContent = username;
+  }
+  if (elements.sessionStatus) {
+    elements.sessionStatus.textContent = `Sessao ativa para ${username}`;
+  }
+}
+
+function decodeJwt(token) {
+  if (!token) return null;
+  try {
+    const [, payload] = token.split('.');
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(normalized));
+  } catch {
+    return null;
+  }
 }
 
 function clearAdminSession() {
-    localStorage.removeItem('adminLoggedIn');
-    localStorage.removeItem('authToken');
-    authToken = null;
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('adminLoggedIn');
+  state.authToken = null;
 }
 
-function handleUnauthorizedStatus(status) {
-    if (status === 401 || status === 403) {
-        clearAdminSession();
-        window.location.href = '/login.html';
-        return true;
+function redirectToLogin() {
+  const url = new URL(buildSiteUrl('/public/login.html'));
+  url.searchParams.set('redirect', LOGIN_REDIRECT_PATH);
+  window.location.href = url.toString();
+}
+
+function logout() {
+  clearAdminSession();
+  localStorage.removeItem('userToken');
+  localStorage.removeItem('userData');
+  redirectToLogin();
+}
+function renderDashboard() {
+  text('stat-total-products', formatNumber(state.stats.totalProducts));
+  text('stat-pending-orders', formatNumber(state.stats.pendingOrders));
+  text('stat-total-sales', formatCurrency(state.stats.totalSales));
+  text('stat-active-customers', formatNumber(state.stats.activeCustomers));
+
+  renderRecentOrders();
+  renderTopProducts();
+  renderOperationalOverview();
+}
+
+function renderRecentOrders() {
+  renderStackList(elements.recentOrdersList, state.recentOrders, (order) => {
+    return `
+      <article class="stack-row">
+        <div>
+          <strong>#${escapeHtml(order.id)}</strong>
+          <p>${escapeHtml(order.customer_name || 'Cliente nao identificado')}</p>
+        </div>
+        <div class="stack-meta">
+          <span class="status-chip ${statusClass(order.status)}">${escapeHtml(getStatusText(order.status))}</span>
+          <strong>${formatCurrency(order.total_amount)}</strong>
+        </div>
+      </article>
+    `;
+  }, 'Sem pedidos recentes.');
+}
+
+function renderTopProducts() {
+  renderStackList(elements.topProductsList, state.topProducts, (product) => {
+    return `
+      <article class="stack-row">
+        <div class="stack-avatar">${escapeHtml((product.name || 'M').slice(0, 1).toUpperCase())}</div>
+        <div class="stack-content">
+          <strong>${escapeHtml(product.name || 'Produto')}</strong>
+          <p>${formatCurrency(product.price)} · Stock ${formatNumber(product.stock_quantity)}</p>
+        </div>
+      </article>
+    `;
+  }, 'Sem produtos para destacar.');
+}
+
+function renderOperationalOverview() {
+  const completedOrders = state.orders.filter((order) => order.status === 'completed').length;
+  const lowStock = state.products.filter((product) => Number(product.stock_quantity || 0) <= 5).length;
+  const newCustomers = state.customers.filter((customer) => isWithinDays(customer.created_at, 30)).length;
+  const averageTicket = state.orders.length ? state.orders.reduce((sum, order) => sum + Number(order.total_amount || 0), 0) / state.orders.length : 0;
+
+  const metrics = [
+    { label: 'Pedidos concluidos', value: formatNumber(completedOrders) },
+    { label: 'Ticket medio', value: formatCurrency(averageTicket) },
+    { label: 'Stock baixo', value: formatNumber(lowStock) },
+    { label: 'Clientes novos em 30 dias', value: formatNumber(newCustomers) }
+  ];
+
+  elements.analyticsOverview.innerHTML = metrics.map((metric) => `
+    <article class="metric-card">
+      <span>${escapeHtml(metric.label)}</span>
+      <strong>${escapeHtml(metric.value)}</strong>
+    </article>
+  `).join('');
+}
+
+function renderProductsTable() {
+  const query = (elements.productsSearch?.value || '').trim().toLowerCase();
+  const filtered = state.products.filter((product) => {
+    const haystack = [product.name, product.description, product.category].join(' ').toLowerCase();
+    return haystack.includes(query);
+  });
+
+  elements.productsSummary.textContent = `${formatNumber(filtered.length)} produtos ativos`;
+  toggleEmptyState(elements.productsEmpty, filtered.length === 0);
+  elements.productsTbody.innerHTML = filtered.map((product) => `
+    <tr>
+      <td>
+        <div class="product-cell">
+          <img class="product-thumb" src="${escapeHtml(getImageUrl(product.image))}" alt="${escapeHtml(product.name || 'Produto')}" data-product-image>
+          <div>
+            <strong>${escapeHtml(product.name || 'Sem nome')}</strong>
+            <p>${escapeHtml(truncateText(product.description || 'Sem descricao.', 72))}</p>
+          </div>
+        </div>
+      </td>
+      <td><span class="table-pill">${escapeHtml(product.category || 'Sem categoria')}</span></td>
+      <td>${formatCurrency(product.price)}</td>
+      <td>${formatNumber(product.stock_quantity)}</td>
+      <td><span class="status-chip ${Number(product.stock_quantity || 0) <= 5 ? 'status-warning' : 'status-success'}">${Number(product.stock_quantity || 0) <= 5 ? 'Stock baixo' : 'Ativo'}</span></td>
+      <td>
+        <div class="table-actions">
+          <button type="button" class="action-btn" data-action="edit-product" data-id="${escapeHtml(product.id)}">Editar</button>
+          <button type="button" class="action-btn danger" data-action="delete-product" data-id="${escapeHtml(product.id)}">Remover</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  applyImageFallbacks(elements.productsTbody);
+}
+
+function renderOrdersTable() {
+  const query = (elements.ordersSearch?.value || '').trim().toLowerCase();
+  const status = elements.ordersFilter?.value || 'all';
+  const filtered = state.orders.filter((order) => {
+    const matchesQuery = [order.id, order.customer_name, order.customer_email].join(' ').toLowerCase().includes(query);
+    const matchesStatus = status === 'all' ? true : order.status === status;
+    return matchesQuery && matchesStatus;
+  });
+
+  elements.ordersSummary.textContent = `${formatNumber(filtered.length)} pedidos carregados`;
+  toggleEmptyState(elements.ordersEmpty, filtered.length === 0);
+  elements.ordersTbody.innerHTML = filtered.map((order) => `
+    <tr>
+      <td>#${escapeHtml(order.id)}</td>
+      <td><strong>${escapeHtml(order.customer_name || 'Cliente nao identificado')}</strong></td>
+      <td>
+        <div class="contact-cell">
+          <span>${escapeHtml(order.customer_email || 'Sem email')}</span>
+          <small>${escapeHtml(order.customer_phone || 'Sem telefone')}</small>
+        </div>
+      </td>
+      <td>${formatCurrency(order.total_amount)}</td>
+      <td><span class="status-chip ${statusClass(order.status)}">${escapeHtml(getStatusText(order.status))}</span></td>
+      <td>${escapeHtml(formatDate(order.created_at))}</td>
+      <td>
+        <div class="table-actions">
+          <button type="button" class="action-btn" data-action="edit-order" data-id="${escapeHtml(order.id)}">Detalhes</button>
+          <button type="button" class="action-btn danger" data-action="delete-order" data-id="${escapeHtml(order.id)}">Excluir</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderCustomersTable() {
+  const query = (elements.customersSearch?.value || '').trim().toLowerCase();
+  const filter = elements.customersFilter?.value || 'all';
+  const filtered = state.customers.filter((customer) => {
+    const matchesQuery = [customer.name, customer.username, customer.email].join(' ').toLowerCase().includes(query);
+    const isActive = customer.is_active !== false;
+    const matchesStatus = filter === 'all' ? true : filter === 'active' ? isActive : !isActive;
+    return matchesQuery && matchesStatus;
+  });
+
+  elements.customersSummary.textContent = `${formatNumber(filtered.length)} clientes carregados`;
+  toggleEmptyState(elements.customersEmpty, filtered.length === 0);
+  elements.customersTbody.innerHTML = filtered.map((customer) => {
+    const isActive = customer.is_active !== false;
+    return `
+      <tr>
+        <td>
+          <div class="contact-cell">
+            <strong>${escapeHtml(customer.name || 'Sem nome')}</strong>
+            <small>@${escapeHtml(customer.username || 'sem-utilizador')}</small>
+          </div>
+        </td>
+        <td>
+          <div class="contact-cell">
+            <span>${escapeHtml(customer.email || 'Sem email')}</span>
+            <small>${escapeHtml(customer.phone || 'Sem telefone')}</small>
+          </div>
+        </td>
+        <td>${formatNumber(customer.orders_count)}</td>
+        <td>${formatCurrency(customer.total_spent)}</td>
+        <td><span class="status-chip ${isActive ? 'status-success' : 'status-neutral'}">${isActive ? 'Ativo' : 'Inativo'}</span></td>
+        <td>
+          <div class="table-actions">
+            <button type="button" class="action-btn" data-action="edit-customer" data-id="${escapeHtml(customer.id)}">Editar</button>
+            <button type="button" class="action-btn danger" data-action="delete-customer" data-id="${escapeHtml(customer.id)}">Desativar</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderAnalytics() {
+  const validOrders = state.orders.filter((order) => order.status !== 'cancelled');
+  const completedThisMonth = state.orders.filter((order) => order.status === 'completed' && isCurrentMonth(order.created_at));
+  const averageTicket = validOrders.length ? validOrders.reduce((sum, order) => sum + Number(order.total_amount || 0), 0) / validOrders.length : 0;
+  const lowStock = state.products.filter((product) => Number(product.stock_quantity || 0) <= 5).length;
+
+  text('analytics-total-orders', formatNumber(state.orders.length));
+  text('analytics-average-ticket', formatCurrency(averageTicket));
+  text('analytics-month-revenue', formatCurrency(completedThisMonth.reduce((sum, order) => sum + Number(order.total_amount || 0), 0)));
+  text('analytics-low-stock', formatNumber(lowStock));
+
+  renderBreakdownList(elements.analyticsCategoryList, buildCountMap(state.products, 'category'), 'Sem categorias para mostrar.');
+  renderBreakdownList(elements.analyticsStatusList, buildCountMap(state.orders, 'status', getStatusText), 'Sem status para mostrar.');
+
+  const topCustomers = [...state.customers]
+    .sort((a, b) => Number(b.total_spent || 0) - Number(a.total_spent || 0))
+    .slice(0, 5);
+
+  renderStackList(elements.topCustomersList, topCustomers, (customer) => `
+    <article class="stack-row">
+      <div>
+        <strong>${escapeHtml(customer.name || 'Cliente')}</strong>
+        <p>${escapeHtml(customer.email || 'Sem email')}</p>
+      </div>
+      <div class="stack-meta">
+        <span>${formatNumber(customer.orders_count)} pedidos</span>
+        <strong>${formatCurrency(customer.total_spent)}</strong>
+      </div>
+    </article>
+  `, 'Sem historico de clientes para ordenar.');
+}
+
+function handleProductsTableClick(event) {
+  const button = event.target.closest('[data-action]');
+  if (!button) return;
+  const id = Number(button.dataset.id);
+  if (button.dataset.action === 'edit-product') openProductModal(findById(state.products, id));
+  if (button.dataset.action === 'delete-product') deleteProduct(id);
+}
+
+function handleOrdersTableClick(event) {
+  const button = event.target.closest('[data-action]');
+  if (!button) return;
+  const id = Number(button.dataset.id);
+  if (button.dataset.action === 'edit-order') openOrderModal(findById(state.orders, id));
+  if (button.dataset.action === 'delete-order') deleteOrder(id);
+}
+
+function handleCustomersTableClick(event) {
+  const button = event.target.closest('[data-action]');
+  if (!button) return;
+  const id = Number(button.dataset.id);
+  if (button.dataset.action === 'edit-customer') openCustomerModal(findById(state.customers, id));
+  if (button.dataset.action === 'delete-customer') deleteCustomer(id);
+}
+function openProductModal(product = null) {
+  elements.productForm.reset();
+  elements.productId.value = product?.id || '';
+  elements.productExistingImage.value = product?.image || '';
+  elements.productModalTitle.textContent = product ? 'Editar produto' : 'Novo produto';
+  document.getElementById('product-name').value = product?.name || '';
+  document.getElementById('product-category').value = product?.category || 'roupas';
+  document.getElementById('product-description').value = product?.description || '';
+  document.getElementById('product-price').value = product?.price || '';
+  document.getElementById('product-stock').value = product?.stock_quantity || 0;
+  document.getElementById('product-status').value = product?.is_active === false ? 'inactive' : 'active';
+  updateProductPreview(product?.image ? getImageUrl(product.image) : '', product?.name || '');
+  openModal('product-modal');
+}
+
+function openOrderModal(order) {
+  if (!order) return;
+  elements.orderForm.reset();
+  elements.orderId.value = order.id;
+  text('order-detail-customer', order.customer_name || 'Cliente nao identificado');
+  text('order-detail-total', formatCurrency(order.total_amount));
+  text('order-detail-email', order.customer_email || 'Sem email');
+  text('order-detail-date', formatDate(order.created_at));
+  document.getElementById('order-status').value = order.status || 'pending';
+  document.getElementById('order-payment-method').value = order.payment_method || '';
+  document.getElementById('order-shipping-address').value = order.shipping_address || '';
+  document.getElementById('order-notes').value = order.notes || '';
+  openModal('order-modal');
+}
+
+function openCustomerModal(customer = null) {
+  elements.customerForm.reset();
+  const isEdit = Boolean(customer);
+  elements.customerMode.value = isEdit ? 'edit' : 'create';
+  elements.customerId.value = customer?.id || '';
+  elements.customerModalTitle.textContent = isEdit ? 'Editar cliente' : 'Novo cliente';
+  document.getElementById('customer-full-name').value = customer?.name || '';
+  document.getElementById('customer-username').value = customer?.username || '';
+  document.getElementById('customer-email').value = customer?.email || '';
+  document.getElementById('customer-phone').value = customer?.phone || '';
+  document.getElementById('customer-address').value = customer?.address || '';
+  document.getElementById('customer-city').value = customer?.city || '';
+  document.getElementById('customer-state').value = customer?.state || '';
+  document.getElementById('customer-zip-code').value = customer?.zip_code || '';
+  elements.customerIsActive.checked = customer?.is_active !== false;
+  elements.customerPassword.required = !isEdit;
+  elements.customerPasswordGroup.classList.toggle('is-hidden', isEdit);
+  elements.customerActiveField.classList.toggle('is-hidden', !isEdit);
+  openModal('customer-modal');
+}
+
+async function handleProductSubmit(event) {
+  event.preventDefault();
+  const formData = new FormData(elements.productForm);
+  const id = formData.get('product_id');
+  let image = formData.get('existing_image') || '';
+  const imageFile = formData.get('image');
+
+  try {
+    if (imageFile && imageFile.size > 0) {
+      image = await uploadImage(imageFile);
     }
-    return false;
-}
 
-// Elementos DOM
-const navLinks = document.querySelectorAll('.nav-link');
-const pageContents = document.querySelectorAll('.page-content');
-const pageTitle = document.getElementById('page-title');
-const addProductBtn = document.getElementById('add-product-btn');
-const addProductModal = document.getElementById('add-product-modal');
-const addProductForm = document.getElementById('add-product-form');
-const editProductModal = document.getElementById('edit-product-modal');
-const editProductForm = document.getElementById('edit-product-form');
-const closeModalBtns = document.querySelectorAll('.close-btn, .close-modal');
-const productsTbody = document.getElementById('products-tbody');
-const ordersTbody = document.getElementById('orders-tbody');
-const customersTbody = document.getElementById('customers-tbody');
-
-// Navegação entre páginas
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetPage = link.getAttribute('data-page');
-        
-        // Remove active class de todos os links e páginas
-        navLinks.forEach(l => l.classList.remove('active'));
-        pageContents.forEach(p => p.classList.remove('active'));
-        
-        // Adiciona active class ao link clicado e página correspondente
-        link.classList.add('active');
-        document.getElementById(`${targetPage}-page`).classList.add('active');
-        
-        // Atualiza o título da página
-        pageTitle.textContent = link.textContent.trim();
-        
-        // Carrega dados específicos da página
-        loadPageData(targetPage);
-    });
-});
-
-// Funções de API
-async function apiRequest(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const headers = {
-        'Content-Type': 'application/json',
-        ...(options.headers || {})
+    const payload = {
+      name: formData.get('name')?.trim(),
+      description: formData.get('description')?.trim(),
+      category: formData.get('category'),
+      price: Number(formData.get('price')),
+      stock_quantity: Number(formData.get('stock_quantity') || 0),
+      image,
+      status: formData.get('status') || 'active'
     };
 
-    if (!authToken) {
-        clearAdminSession();
-        window.location.href = '/login.html';
-        throw new Error('Sessao de administrador invalida');
+    if (id) {
+      await apiRequest(`/products/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      showToast('Produto atualizado com sucesso.', 'success');
+    } else {
+      await apiRequest('/products', { method: 'POST', body: JSON.stringify(payload) });
+      showToast('Produto criado com sucesso.', 'success');
     }
 
-    const config = {
-        ...options,
-        headers: {
-            ...headers,
-            'Authorization': `Bearer ${authToken}`
-        }
-    };
-
-    try {
-        const response = await fetch(url, config);
-        if (!response.ok) {
-            if (handleUnauthorizedStatus(response.status)) {
-                throw new Error('Sessao expirada');
-            }
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error('API Error:', error);
-        if (error.message !== 'Sessao expirada') {
-            showNotification('Erro na comunicacao com o servidor', 'error');
-        }
-        throw error;
-    }
+    closeModal('product-modal');
+    await refreshAllData({ notify: false });
+  } catch (error) {
+    console.error('Erro ao guardar produto:', error);
+    showToast(error.message || 'Nao foi possivel guardar o produto.', 'error');
+  }
 }
 
-// Função para carregar dados específicos de cada página
-async function loadPageData(page) {
-    try {
-        switch(page) {
-            case 'products':
-                await loadProducts();
-                break;
-            case 'orders':
-                await loadOrders();
-                break;
-            case 'customers':
-                await loadCustomers();
-                break;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-    }
+async function handleOrderSubmit(event) {
+  event.preventDefault();
+  const formData = new FormData(elements.orderForm);
+  const id = formData.get('order_id');
+  const payload = {
+    status: formData.get('status'),
+    payment_method: formData.get('payment_method')?.trim(),
+    shipping_address: formData.get('shipping_address')?.trim(),
+    notes: formData.get('notes')?.trim()
+  };
+
+  try {
+    await apiRequest(`/orders/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+    closeModal('order-modal');
+    await refreshAllData({ notify: false });
+    showToast('Pedido atualizado com sucesso.', 'success');
+  } catch (error) {
+    console.error('Erro ao atualizar pedido:', error);
+    showToast(error.message || 'Nao foi possivel atualizar o pedido.', 'error');
+  }
 }
 
-// Modal de adicionar produto
-addProductBtn.addEventListener('click', () => {
-    addProductModal.classList.add('active');
-});
+async function handleCustomerSubmit(event) {
+  event.preventDefault();
+  const formData = new FormData(elements.customerForm);
+  const mode = formData.get('customer_mode');
+  const id = formData.get('customer_id');
+  const payload = {
+    full_name: formData.get('full_name')?.trim(),
+    username: formData.get('username')?.trim(),
+    email: formData.get('email')?.trim(),
+    phone: formData.get('phone')?.trim(),
+    address: formData.get('address')?.trim(),
+    city: formData.get('city')?.trim(),
+    state: formData.get('state')?.trim(),
+    zip_code: formData.get('zip_code')?.trim()
+  };
 
-closeModalBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        addProductModal.classList.remove('active');
-        addProductForm.reset();
-        editProductModal.classList.remove('active');
-        editProductForm.reset();
-    });
-});
-
-// Fechar modal clicando fora
-addProductModal.addEventListener('click', (e) => {
-    if (e.target === addProductModal) {
-        addProductModal.classList.remove('active');
-        addProductForm.reset();
+  try {
+    if (mode === 'create') {
+      payload.password = formData.get('password');
+      await apiRequest('/customers', { method: 'POST', body: JSON.stringify(payload) });
+      showToast('Cliente criado com sucesso.', 'success');
+    } else {
+      payload.is_active = elements.customerIsActive.checked;
+      await apiRequest(`/customers/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      showToast('Cliente atualizado com sucesso.', 'success');
     }
-});
 
-editProductModal.addEventListener('click', (e) => {
-    if (e.target === editProductModal) {
-        editProductModal.classList.remove('active');
-        editProductForm.reset();
-    }
-});
-
-// Upload de imagem
-async function uploadImage(file) {
-    const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/upload-image`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: formData
-        });
-
-        if (!response.ok) {
-            if (handleUnauthorizedStatus(response.status)) {
-                throw new Error('Sessao expirada');
-            }
-            throw new Error('Erro no upload da imagem');
-        }
-
-        const result = await response.json();
-        return result.imageUrl;
-    } catch (error) {
-        console.error('Erro no upload:', error);
-        if (error.message !== 'Sessao expirada') {
-            showNotification('Erro ao fazer upload da imagem', 'error');
-        }
-        throw error;
-    }
-}
-
-// Formulário de adicionar produto
-addProductForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(addProductForm);
-    const imageFile = formData.get('image');
-    
-    try {
-        let imageUrl = '';
-        
-        if (imageFile && imageFile.size > 0) {
-            imageUrl = await uploadImage(imageFile);
-        }
-        
-        const newProduct = {
-            name: formData.get('name'),
-            description: formData.get('description'),
-            category: formData.get('category'),
-            price: parseFloat(formData.get('price')),
-            stock_quantity: parseInt(formData.get('stock')) || 0,
-            image: imageUrl || '/uploads/default-product.jpg'
-        };
-        
-        const response = await apiRequest('/products', {
-            method: 'POST',
-            body: JSON.stringify(newProduct)
-        });
-        
-        await loadProducts();
-        addProductModal.classList.remove('active');
-        addProductForm.reset();
-        
-        showNotification('Produto adicionado com sucesso!', 'success');
-    } catch (error) {
-        console.error('Erro ao adicionar produto:', error);
-        showNotification('Erro ao adicionar produto', 'error');
-    }
-});
-
-// Formulário de editar produto
-editProductForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(editProductForm);
-    const imageFile = formData.get('image');
-    const productId = formData.get('product_id');
-    
-    try {
-        let imageUrl = '';
-        
-        if (imageFile && imageFile.size > 0) {
-            imageUrl = await uploadImage(imageFile);
-        }
-        
-        const updatedProduct = {
-            name: formData.get('name'),
-            description: formData.get('description'),
-            category: formData.get('category'),
-            price: parseFloat(formData.get('price')),
-            stock_quantity: parseInt(formData.get('stock')) || 0,
-            status: formData.get('status')
-        };
-        
-        // Se uma nova imagem foi enviada, incluir no objeto
-        if (imageUrl) {
-            updatedProduct.image = imageUrl;
-        }
-        
-        const response = await apiRequest(`/products/${productId}`, {
-            method: 'PUT',
-            body: JSON.stringify(updatedProduct)
-        });
-        
-        await loadProducts();
-        editProductModal.classList.remove('active');
-        editProductForm.reset();
-        
-        showNotification('Produto atualizado com sucesso!', 'success');
-    } catch (error) {
-        console.error('Erro ao atualizar produto:', error);
-        showNotification('Erro ao atualizar produto', 'error');
-    }
-});
-
-// Função para carregar produtos
-async function loadProducts() {
-    try {
-        products = await apiRequest('/products');
-        productsTbody.innerHTML = '';
-        
-        products.forEach(product => {
-            const row = document.createElement('tr');
-            const isActive = product.is_active !== false; // Considera ativo se is_active não for false
-            row.innerHTML = `
-                <td>
-                    <img src="${getImageUrl(product.image)}" alt="${product.name}" class="product-image">
-                </td>
-                <td>${product.name}</td>
-                <td>${product.category}</td>
-                <td>AOA ${product.price.toLocaleString()}</td>
-                <td>${product.stock_quantity || product.stock}</td>
-                <td>
-                    <span class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">
-                        ${isActive ? 'Ativo' : 'Inativo'}
-                    </span>
-                </td>
-                <td>
-                    <div class="table-actions">
-                        <button class="action-btn edit-btn" onclick="editProduct(${product.id})">Editar</button>
-                        <button class="action-btn delete-btn" onclick="deleteProduct(${product.id})">Excluir</button>
-                    </div>
-                </td>
-            `;
-            productsTbody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-    }
-}
-
-// Função para carregar pedidos
-async function loadOrders() {
-    try {
-        orders = await apiRequest('/orders');
-        ordersTbody.innerHTML = '';
-        
-        orders.forEach(order => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>#${order.id}</td>
-                <td>${order.customer_name || 'Cliente não identificado'}</td>
-                <td>${order.customer_email || 'Email não informado'}</td>
-                <td>AOA ${parseFloat(order.total_amount || 0).toLocaleString()}</td>
-                <td>
-                    <span class="order-status ${order.status || 'pending'}">
-                        ${getStatusText(order.status || 'pending')}
-                    </span>
-                </td>
-                <td>${formatDate(order.created_at)}</td>
-                <td>
-                    <div class="table-actions">
-                        <button class="action-btn edit-btn" onclick="editOrder(${order.id})">Ver Detalhes</button>
-                        <button class="action-btn delete-btn" onclick="deleteOrder(${order.id})">Excluir</button>
-                    </div>
-                </td>
-            `;
-            ordersTbody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Erro ao carregar pedidos:', error);
-    }
-}
-
-// Função para carregar clientes
-async function loadCustomers() {
-    try {
-        customers = await apiRequest('/customers');
-        customersTbody.innerHTML = '';
-        
-        customers.forEach(customer => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${customer.name || customer.full_name || 'N/A'}</td>
-                <td>${customer.email || 'N/A'}</td>
-                <td>${customer.phone || 'N/A'}</td>
-                <td>${customer.orders_count || 0}</td>
-                <td>AOA ${parseFloat(customer.total_spent || 0).toLocaleString()}</td>
-                <td>
-                    <span class="status-badge ${customer.is_active ? 'status-active' : 'status-inactive'}">
-                        ${customer.is_active ? 'Ativo' : 'Inativo'}
-                    </span>
-                </td>
-                <td>
-                    <div class="table-actions">
-                        <button class="action-btn edit-btn" onclick="editCustomer(${customer.id})">Editar</button>
-                        <button class="action-btn delete-btn" onclick="deleteCustomer(${customer.id})">Desativar</button>
-                    </div>
-                </td>
-            `;
-            customersTbody.appendChild(row);
-        });
-    } catch (error) {
-        console.error('Erro ao carregar clientes:', error);
-    }
-}
-
-// Funções auxiliares
-function getStatusText(status) {
-    const statusMap = {
-        'pending': 'Pendente',
-        'processing': 'Processando',
-        'completed': 'Concluído',
-        'cancelled': 'Cancelado'
-    };
-    return statusMap[status] || status;
-}
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
-}
-
-// Funções de edição e exclusão
-function editProduct(id) {
-    const product = products.find(p => p.id === id);
-    if (product) {
-        // Preencher o formulário com os dados do produto
-        document.getElementById('edit-product-id').value = product.id;
-        document.getElementById('edit-product-name').value = product.name;
-        document.getElementById('edit-product-description').value = product.description || '';
-        document.getElementById('edit-product-category').value = product.category;
-        document.getElementById('edit-product-price').value = product.price;
-        document.getElementById('edit-product-stock').value = product.stock_quantity || product.stock;
-        document.getElementById('edit-product-status').value = (product.is_active !== false) ? 'active' : 'inactive';
-        
-        // Mostrar imagem atual
-        const currentImage = document.getElementById('edit-product-current-image');
-        currentImage.src = getImageUrl(product.image);
-        currentImage.style.display = 'block';
-        
-        // Abrir modal
-        editProductModal.classList.add('active');
-    }
+    closeModal('customer-modal');
+    await refreshAllData({ notify: false });
+  } catch (error) {
+    console.error('Erro ao guardar cliente:', error);
+    showToast(error.message || 'Nao foi possivel guardar o cliente.', 'error');
+  }
 }
 
 async function deleteProduct(id) {
-    if (confirm('Tem certeza que deseja excluir este produto?')) {
-        try {
-            await apiRequest(`/products/${id}`, { method: 'DELETE' });
-            await loadProducts();
-            showNotification('Produto excluído com sucesso!', 'success');
-        } catch (error) {
-            console.error('Erro ao excluir produto:', error);
-            showNotification('Erro ao excluir produto', 'error');
-        }
-    }
-}
-
-function editOrder(id) {
-    const order = orders.find(o => o.id === id);
-    if (order) {
-        showNotification(`Detalhes do pedido #${id} serão exibidos!`, 'info');
-    }
+  if (!window.confirm('Deseja desativar este produto?')) return;
+  await apiRequest(`/products/${id}`, { method: 'DELETE' });
+  await refreshAllData({ notify: false });
+  showToast('Produto removido da listagem ativa.', 'success');
 }
 
 async function deleteOrder(id) {
-    if (confirm('Tem certeza que deseja excluir este pedido?')) {
-        try {
-            await apiRequest(`/orders/${id}`, { method: 'DELETE' });
-            await loadOrders();
-            showNotification('Pedido excluído com sucesso!', 'success');
-        } catch (error) {
-            console.error('Erro ao excluir pedido:', error);
-            showNotification('Erro ao excluir pedido', 'error');
-        }
-    }
-}
-
-function editCustomer(id) {
-    const customer = customers.find(c => c.id === id);
-    if (customer) {
-        // Por enquanto, apenas mostra uma notificação
-        // Em uma implementação completa, abriria um modal de edição
-        showNotification(`Editando cliente: ${customer.name || customer.full_name}`, 'info');
-    }
+  if (!window.confirm('Deseja excluir este pedido?')) return;
+  await apiRequest(`/orders/${id}`, { method: 'DELETE' });
+  await refreshAllData({ notify: false });
+  showToast('Pedido excluido com sucesso.', 'success');
 }
 
 async function deleteCustomer(id) {
-    if (confirm('Tem certeza que deseja desativar este cliente?')) {
-        try {
-            await apiRequest(`/customers/${id}`, { method: 'DELETE' });
-            await loadCustomers();
-            showNotification('Cliente desativado com sucesso!', 'success');
-        } catch (error) {
-            console.error('Erro ao desativar cliente:', error);
-            showNotification('Erro ao desativar cliente', 'error');
-        }
-    }
+  if (!window.confirm('Deseja desativar este cliente?')) return;
+  await apiRequest(`/customers/${id}`, { method: 'DELETE' });
+  await refreshAllData({ notify: false });
+  showToast('Cliente desativado com sucesso.', 'success');
 }
 
-// Sistema de notificações
-function showNotification(message, type = 'info') {
-    // Remove notificação existente
-    const existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-        existingNotification.remove();
-    }
-    
-    // Cria nova notificação
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <span>${message}</span>
-        <button class="notification-close">&times;</button>
-    `;
-    
-    // Adiciona estilos
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#cce5ff'};
-        color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#004085'};
-        padding: 12px 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        z-index: 1001;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        max-width: 300px;
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Botão de fechar
-    const closeBtn = notification.querySelector('.notification-close');
-    closeBtn.addEventListener('click', () => {
-        notification.remove();
-    });
-    
-    // Auto-remove após 5 segundos
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 5000);
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
 }
 
-// Logout
-document.querySelector('.logout-btn').addEventListener('click', () => {
-    if (confirm('Tem certeza que deseja sair?')) {
-        clearAdminSession();
-        window.location.href = '../index.html';
-    }
-});
-
-// Verificação de autenticação
-async function checkAuth() {
-    const isAdminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
-    const storedToken = localStorage.getItem('authToken');
-
-    if (!isAdminLoggedIn || !storedToken) {
-        clearAdminSession();
-        window.location.href = '../index.html';
-        return false;
-    }
-
-    authToken = storedToken;
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
-
-        if (response.ok) {
-            return true;
-        }
-
-        if (handleUnauthorizedStatus(response.status)) {
-            return false;
-        }
-
-        showNotification('Nao foi possivel validar a sessao', 'error');
-        return false;
-    } catch (error) {
-        console.error('Erro ao validar sessao:', error);
-        showNotification('Erro ao validar a sessao de administrador', 'error');
-        return false;
-    }
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
 }
 
-// Inicialização
-document.addEventListener('DOMContentLoaded', async () => {
-    // Verifica se está autenticado
-    if (!await checkAuth()) return;
-    
-    // Carrega dados iniciais do dashboard
-    loadPageData('dashboard');
-    
-    // Atualiza estatísticas do dashboard
-    updateDashboardStats();
-});
+function previewSelectedImage() {
+  const file = elements.productImageInput?.files?.[0];
+  if (!file) {
+    updateProductPreview(elements.productExistingImage.value ? getImageUrl(elements.productExistingImage.value) : '', '');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => updateProductPreview(reader.result, file.name);
+  reader.readAsDataURL(file);
+}
 
-// Função para atualizar estatísticas do dashboard
-function updateDashboardStats() {
-    const totalProducts = products.length;
-    const pendingOrders = orders.filter(o => o.status === 'pending').length;
-    const totalSales = orders.reduce((sum, order) => sum + order.total, 0);
-    const activeCustomers = customers.filter(c => c.status === 'active').length;
-    
-    // Aqui você pode atualizar os elementos do dashboard com os valores reais
-    console.log('Estatísticas atualizadas:', {
-        totalProducts,
-        pendingOrders,
-        totalSales,
-        activeCustomers
-    });
-} 
+function updateProductPreview(src, label) {
+  const finalSrc = src || PLACEHOLDER_IMAGE;
+  elements.productImagePreview.src = finalSrc;
+  elements.productImageCaption.textContent = label ? `Imagem pronta: ${label}` : 'Nenhuma imagem selecionada.';
+  elements.productImagePreview.onerror = () => {
+    elements.productImagePreview.onerror = null;
+    elements.productImagePreview.src = PLACEHOLDER_IMAGE;
+  };
+}
 
+function handleSettingsSubmit(event) {
+  event.preventDefault();
+  const formData = new FormData(elements.settingsForm);
+  state.settings = {
+    store_name: String(formData.get('store_name') || '').trim(),
+    contact_email: String(formData.get('contact_email') || '').trim(),
+    contact_phone: String(formData.get('contact_phone') || '').trim(),
+    support_hours: String(formData.get('support_hours') || '').trim(),
+    store_address: String(formData.get('store_address') || '').trim(),
+    announcement: String(formData.get('announcement') || '').trim()
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  elements.settingsFeedback.textContent = 'Configuracoes guardadas neste navegador.';
+  showToast('Configuracoes atualizadas localmente.', 'success');
+}
+
+function resetSettingsForm() {
+  state.settings = { ...DEFAULT_SETTINGS };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state.settings));
+  hydrateSettingsForm();
+  elements.settingsFeedback.textContent = 'Valores padrao restaurados.';
+}
+
+function hydrateSettingsForm() {
+  if (!elements.settingsForm) return;
+  Object.entries(state.settings).forEach(([key, value]) => {
+    const field = elements.settingsForm.querySelector(`[name="${key}"]`);
+    if (field) field.value = value;
+  });
+}
+
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null');
+    return { ...DEFAULT_SETTINGS, ...(saved || {}) };
+  } catch {
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+
+function renderStackList(container, items, template, emptyMessage) {
+  if (!container) return;
+  if (!items.length) {
+    container.innerHTML = `<p class="empty-inline">${escapeHtml(emptyMessage)}</p>`;
+    return;
+  }
+  container.innerHTML = items.map(template).join('');
+}
+
+function renderBreakdownList(container, map, emptyMessage) {
+  const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+  renderStackList(container, entries, ([label, value]) => `
+    <article class="stack-row">
+      <div><strong>${escapeHtml(label || 'Sem categoria')}</strong></div>
+      <div class="stack-meta"><strong>${formatNumber(value)}</strong></div>
+    </article>
+  `, emptyMessage);
+}
+
+function buildCountMap(items, key, labelFormatter = (value) => normalizeLabel(value)) {
+  return items.reduce((acc, item) => {
+    const rawValue = item?.[key] || 'Sem registo';
+    const label = labelFormatter(rawValue);
+    acc[label] = (acc[label] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function updateLastSyncLabel() {
+  if (!elements.lastSync || !state.lastSync) return;
+  elements.lastSync.textContent = `Ultima atualizacao: ${formatDate(state.lastSync.toISOString())}`;
+}
+
+function getImageUrl(imagePath) {
+  if (!imagePath) return PLACEHOLDER_IMAGE;
+  if (/^https?:\/\//.test(imagePath) || imagePath.startsWith('data:')) return imagePath;
+  return `${API_ORIGIN}${imagePath}`;
+}
+
+function applyImageFallbacks(scope) {
+  scope?.querySelectorAll('[data-product-image]').forEach((image) => {
+    image.onerror = () => {
+      image.onerror = null;
+      image.src = PLACEHOLDER_IMAGE;
+    };
+  });
+}
+
+function findById(items, id) {
+  return items.find((item) => Number(item.id) === Number(id));
+}
+
+function toggleEmptyState(element, isVisible) {
+  element?.classList.toggle('hidden', !isVisible);
+}
+
+function showToast(message, type = 'info') {
+  if (!elements.toastStack) return;
+  const toast = document.createElement('article');
+  toast.className = `toast toast-${type}`;
+  toast.textContent = message;
+  elements.toastStack.appendChild(toast);
+  window.setTimeout(() => toast.remove(), 3500);
+}
+
+function getStatusText(status) {
+  return {
+    pending: 'Pendente',
+    processing: 'Processando',
+    completed: 'Concluido',
+    cancelled: 'Cancelado'
+  }[status] || normalizeLabel(status || 'Sem estado');
+}
+
+function statusClass(status) {
+  return {
+    pending: 'status-warning',
+    processing: 'status-info',
+    completed: 'status-success',
+    cancelled: 'status-danger'
+  }[status] || 'status-neutral';
+}
+
+function formatCurrency(value) {
+  return `AOA ${Number(value || 0).toLocaleString('pt-PT', { maximumFractionDigits: 0 })}`;
+}
+
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString('pt-PT');
+}
+
+function formatDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Data invalida';
+  return date.toLocaleString('pt-PT', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function truncateText(value, maxLength) {
+  if (!value || value.length <= maxLength) return value || '';
+  return `${value.slice(0, maxLength - 1)}...`;
+}
+
+function normalizeLabel(value) {
+  return String(value || 'Sem registo')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function text(id, value) {
+  const node = document.getElementById(id);
+  if (node) node.textContent = value;
+}
+
+function isWithinDays(dateValue, days) {
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return false;
+  const diff = Date.now() - date.getTime();
+  return diff <= days * 24 * 60 * 60 * 1000;
+}
+
+function isCurrentMonth(dateValue) {
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return false;
+  const now = new Date();
+  return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+}
