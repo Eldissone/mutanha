@@ -1,10 +1,20 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .mix-home {
   background: #ececec;
   color: #111827;
 }
 
+.truncate {
+  padding: 10px;
+}
+
 .mix-page {
-  width: min(1400px, 96vw);
+  width: min(1400px, 96vw);  
   margin: 24px auto 48px;
 }
 
@@ -14,6 +24,7 @@
   border: 1px solid #d7d7d7;
   overflow: hidden;
   background: #12395d;
+  border-radius: 14px;
 }
 
 .mix-hero-bg {
@@ -22,12 +33,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: 50% 35%;
 }
 
 .mix-hero-shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(20, 41, 64, 0.7) 0%, rgba(20, 41, 64, 0.28) 45%, rgba(20, 41, 64, 0.12) 100%);
+  background: linear-gradient(90deg, rgba(20, 41, 64, 0.214) 0%, rgba(20, 41, 64, 0.115) 45%, rgba(20, 41, 64, 0) 100%);
 }
 
 .mix-hero-header {
@@ -248,14 +260,17 @@
   padding: 0 0 14px;
   display: flex;
   flex-direction: column;
+  border-radius: 12px;
 }
+
 
 .mix-product-image {
   width: 100%;
+  border-radius: 12px;
   aspect-ratio: 1 / 1;
   background-position: center;
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: cover;
   background-color: #f3f3f3;
 }
 
@@ -284,6 +299,7 @@
 
 .mix-product-btn {
   margin: 12px 12px 0;
+  padding: 5px;
   min-height: 34px;
   border: 1px solid #111827;
   border-radius: 4px;
@@ -327,7 +343,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.256);
 }
 
 .mix-promo > * {

@@ -23,7 +23,7 @@ function clearAdminSession() {
 function handleUnauthorizedStatus(status) {
     if (status === 401 || status === 403) {
         clearAdminSession();
-        window.location.href = 'login.html';
+        window.location.href = '/login.html';
         return true;
     }
     return false;
@@ -75,7 +75,7 @@ async function apiRequest(endpoint, options = {}) {
 
     if (!authToken) {
         clearAdminSession();
-        window.location.href = 'login.html';
+        window.location.href = '/login.html';
         throw new Error('Sessao de administrador invalida');
     }
 
@@ -518,7 +518,7 @@ function showNotification(message, type = 'info') {
 document.querySelector('.logout-btn').addEventListener('click', () => {
     if (confirm('Tem certeza que deseja sair?')) {
         clearAdminSession();
-        window.location.href = 'login.html';
+        window.location.href = '../index.html';
     }
 });
 
@@ -529,7 +529,7 @@ async function checkAuth() {
 
     if (!isAdminLoggedIn || !storedToken) {
         clearAdminSession();
-        window.location.href = 'login.html';
+        window.location.href = '../index.html';
         return false;
     }
 

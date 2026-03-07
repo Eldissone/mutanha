@@ -90,7 +90,7 @@
       <article class="mix-promo mix-promo-a">
         <p class="mix-promo-tag">ETHEREAL ELEGANCE</p>
         <h3>Where Dreams Meet Couture</h3>
-        <a href="public/roupas.html">Shop Now</a>
+        <a href="public/roupas.html">Shop Now</a> 
       </article>
 
       <article class="mix-promo mix-promo-b">
@@ -127,7 +127,8 @@
 
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-[#250129] mb-2" for="payment-method">Metodo de pagamento *</label>
+          <label class="block text-sm font-medium text-[#250129] mb-2" for="payment-method">Metodo de pagamento
+            *</label>
           <select id="payment-method"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ebc201]">
             <option value="">Selecione...</option>
@@ -140,7 +141,8 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-[#250129] mb-2" for="shipping-address">Endereco de entrega</label>
+          <label class="block text-sm font-medium text-[#250129] mb-2" for="shipping-address">Endereco de
+            entrega</label>
           <textarea id="shipping-address" rows="3"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ebc201]"
             placeholder="Opcional"></textarea>
@@ -157,8 +159,9 @@
           <button onclick="closeModal('checkout-modal')"
             class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
             type="button">Cancelar</button>
-          <button onclick="processOrder()" class="flex-1 px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]"
-            type="button">Finalizar Pedido</button>
+          <button onclick="processOrder()"
+            class="flex-1 px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]" type="button">Finalizar
+            Pedido</button>
         </div>
       </div>
     </div>
@@ -193,19 +196,26 @@
 
   <div id="profileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 relative text-center">
-      <button onclick="closeModal('profileModal')" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700" type="button">
+      <button onclick="closeModal('profileModal')" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+        type="button">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
 
-      <div id="profile-avatar" class="w-20 h-20 rounded-full bg-[#ef8a42] text-white flex items-center justify-center font-bold text-3xl border-4 border-[#ef8a42] bg-center bg-cover mx-auto mb-4">U</div>
+      <div id="profile-avatar"
+        class="w-20 h-20 rounded-full bg-[#ef8a42] text-white flex items-center justify-center font-bold text-3xl border-4 border-[#ef8a42] bg-center bg-cover mx-auto mb-4">
+        U</div>
       <h3 id="profile-name" class="text-xl font-bold text-[#250129]">Utilizador</h3>
       <p id="profile-email" class="text-gray-600 mt-1 mb-6">email@dominio.com</p>
 
       <div class="flex gap-3">
-        <button onclick="openSettings()" class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50" type="button">Configuracoes</button>
-        <button onclick="logout(); closeModal('profileModal')" class="flex-1 px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]" type="button">Terminar sessao</button>
+        <button onclick="openSettings()"
+          class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+          type="button">Configuracoes</button>
+        <button onclick="logout(); closeModal('profileModal')"
+          class="flex-1 px-4 py-2 bg-[#ebc201] text-white rounded-md hover:bg-[#d67a3a]" type="button">Terminar
+          sessao</button>
       </div>
     </div>
   </div>

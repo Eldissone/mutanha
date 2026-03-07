@@ -14,6 +14,7 @@
   min-height: 430px;
   border: 1px solid #d7d7d7;
   overflow: hidden;
+  border-radius: 12px;
 }
 
 .cat-hero-bg {
@@ -27,7 +28,7 @@
 .cat-hero-shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(12, 31, 52, 0.68) 0%, rgba(12, 31, 52, 0.35) 46%, rgba(12, 31, 52, 0.14) 100%);
+  background: linear-gradient(90deg, rgba(12, 31, 52, 0.507) 0%, rgba(12, 31, 52, 0.35) 46%, rgba(12, 31, 52, 0.14) 100%);
 }
 
 .cat-header {
@@ -214,7 +215,7 @@
   position: relative;
 }
 
-.filter-dropdown > button {
+.filter-dropdown>button {
   min-height: 36px;
   border: 1px solid #dadada;
   border-radius: 9999px;
@@ -318,15 +319,19 @@
   display: flex;
   flex-direction: column;
   padding-bottom: 12px;
+  border-radius: 12px;
 }
 
 .cat-product-image {
   width: 100%;
+  border-radius: 12px;
   aspect-ratio: 1 / 1;
   background-position: center;
-  background-size: contain;
+  background-size: cover  ;
   background-repeat: no-repeat;
   background-color: #f2f2f2;
+  border: none;
+
 }
 
 .cat-product-brand {
@@ -600,7 +605,7 @@
   border: 1px solid #d1d5db;
   border-radius: 12px;
   background-position: center;
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
   background-color: #f4f4f4;
 }

@@ -141,8 +141,8 @@
 
 .auth-field input,
 .auth-field textarea {
-  width: 100%;
-  min-height: 42px;
+  width: 90%;
+  min-height: 32px;
   border: 1px solid #d1d5db;
   border-radius: 10px;
   padding: 9px 12px;
