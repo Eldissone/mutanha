@@ -22,6 +22,14 @@
       {
         "aria-required-children": "off"
       }
+    ],
+    "compat-api/html": [
+      "default",
+      {
+        "ignore": [
+          "meta[name=theme-color]"
+        ]
+      }
     ]
   }
 }

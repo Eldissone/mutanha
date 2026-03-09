@@ -64,12 +64,12 @@ const authenticateToken = (req, res, next) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-        return res.status(401).json({ error: 'Token de acesso necessÃ¡rio' });
+        return res.status(401).json({ error: 'Token de acesso necessário' });
     }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
         if (err) {
-            return res.status(403).json({ error: 'Token invÃ¡lido' });
+            return res.status(403).json({ error: 'Token inválido' });
         }
         req.user = user;
         next();
@@ -206,7 +206,7 @@ app.get('/api/public/products', async (req, res) => {
         );
         res.json(result.rows);
     } catch (error) {
-        console.error('Erro ao buscar produtos pÃºblicos:', error);
+        console.error('Erro ao buscar produtos públicos:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
@@ -231,7 +231,7 @@ app.post('/api/register', async (req, res) => {
         
         // ValidaÃ§Ã£o bÃ¡sica
         if (!username || !email || !password || !full_name) {
-            return res.status(400).json({ error: 'Todos os campos obrigatÃ³rios devem ser preenchidos' });
+            return res.status(400).json({ error: 'Todos os campos obrigatórios devem ser preenchidos' });
         }
         
         // Verificar se usuÃ¡rio jÃ¡ existe
@@ -241,7 +241,7 @@ app.post('/api/register', async (req, res) => {
         );
         
         if (existingUser.rows.length > 0) {
-            return res.status(400).json({ error: 'UsuÃ¡rio ou email jÃ¡ existe' });
+            return res.status(400).json({ error: 'Usuário ou email já existe' });
         }
         
         // Hash da senha
@@ -270,7 +270,7 @@ app.post('/api/register', async (req, res) => {
             user: result.rows[0]
         });
     } catch (error) {
-        console.error('Erro ao registrar usuÃ¡rio:', error);
+        console.error('Erro ao registrar usuário:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
@@ -296,7 +296,7 @@ app.post('/api/user/login', async (req, res) => {
             );
 
             if (adminResult.rows.length === 0) {
-                return res.status(401).json({ error: 'Credenciais invÃ¡lidas' });
+                return res.status(401).json({ error: 'Credenciais inválidas' });
             }
 
             user = adminResult.rows[0];
@@ -306,7 +306,7 @@ app.post('/api/user/login', async (req, res) => {
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
-            return res.status(401).json({ error: 'Credenciais invÃ¡lidas' });
+            return res.status(401).json({ error: 'Credenciais inválidas' });
         }
 
         const token = jwt.sign(
@@ -332,7 +332,7 @@ app.post('/api/user/login', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Erro no login do usuÃ¡rio:', error);
+        console.error('Erro no login do usuário:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
@@ -360,13 +360,13 @@ app.post('/api/cart/add', authenticateUser, async (req, res) => {
         );
         
         if (productResult.rows.length === 0) {
-            return res.status(404).json({ error: 'Produto nÃ£o encontrado' });
+            return res.status(404).json({ error: 'Produto não encontrado' });
         }
         
         const product = productResult.rows[0];
         
         if (Number(product.stock_quantity) < requestedQuantity) {
-            return res.status(400).json({ error: 'Quantidade solicitada nÃ£o disponÃ­vel em estoque' });
+            return res.status(400).json({ error: 'Quantidade solicitada não disponí­vel em estoque' });
         }
         
         // Buscar ou criar carrinho

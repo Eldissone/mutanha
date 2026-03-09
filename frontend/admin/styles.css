@@ -44,7 +44,7 @@ img { display: block; max-width: 100%; }
 .admin-sidebar {
   position: sticky;
   top: 0;
-  height: 100vh;
+  min-height: 100vh;
   padding: 28px 22px;
   background: linear-gradient(180deg, rgba(36, 23, 15, 0.96), rgba(59, 31, 15, 0.94));
   color: #fff7ed;

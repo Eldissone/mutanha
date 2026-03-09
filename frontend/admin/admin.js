@@ -378,7 +378,8 @@ function decodeJwt(token) {
   try {
     const [, payload] = token.split('.');
     const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-    return JSON.parse(atob(normalized));
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    return JSON.parse(atob(padded));
   } catch {
     return null;
   }
@@ -779,23 +780,38 @@ async function handleCustomerSubmit(event) {
 
 async function deleteProduct(id) {
   if (!window.confirm('Deseja desativar este produto?')) return;
-  await apiRequest(`/products/${id}`, { method: 'DELETE' });
-  await refreshAllData({ notify: false });
-  showToast('Produto removido da listagem ativa.', 'success');
+  try {
+    await apiRequest(`/products/${id}`, { method: 'DELETE' });
+    await refreshAllData({ notify: false });
+    showToast('Produto removido da listagem ativa.', 'success');
+  } catch (error) {
+    console.error('Erro ao remover produto:', error);
+    showToast(error.message || 'Nao foi possivel remover o produto.', 'error');
+  }
 }
 
 async function deleteOrder(id) {
   if (!window.confirm('Deseja excluir este pedido?')) return;
-  await apiRequest(`/orders/${id}`, { method: 'DELETE' });
-  await refreshAllData({ notify: false });
-  showToast('Pedido excluido com sucesso.', 'success');
+  try {
+    await apiRequest(`/orders/${id}`, { method: 'DELETE' });
+    await refreshAllData({ notify: false });
+    showToast('Pedido excluido com sucesso.', 'success');
+  } catch (error) {
+    console.error('Erro ao excluir pedido:', error);
+    showToast(error.message || 'Nao foi possivel excluir o pedido.', 'error');
+  }
 }
 
 async function deleteCustomer(id) {
   if (!window.confirm('Deseja desativar este cliente?')) return;
-  await apiRequest(`/customers/${id}`, { method: 'DELETE' });
-  await refreshAllData({ notify: false });
-  showToast('Cliente desativado com sucesso.', 'success');
+  try {
+    await apiRequest(`/customers/${id}`, { method: 'DELETE' });
+    await refreshAllData({ notify: false });
+    showToast('Cliente desativado com sucesso.', 'success');
+  } catch (error) {
+    console.error('Erro ao desativar cliente:', error);
+    showToast(error.message || 'Nao foi possivel desativar o cliente.', 'error');
+  }
 }
 
 function openModal(id) {
@@ -1010,3 +1026,4 @@ function isCurrentMonth(dateValue) {
   const now = new Date();
   return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
 }
+

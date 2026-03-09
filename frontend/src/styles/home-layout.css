@@ -135,8 +135,8 @@
 .mix-hero-content {
   position: relative;
   z-index: 2;
-  max-width: 520px;
-  padding: 110px 56px 40px;
+  max-width: 780px;
+  padding: 110px 86px 40px;
   color: #ffffff;
 }
 
@@ -356,7 +356,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: #6b7280;
+  color: #505153;
 }
 
 .mix-promo h3 {
@@ -365,7 +365,10 @@
   line-height: 1.05;
   font-weight: 800;
   letter-spacing: -0.02em;
-  max-width: 340px;
+  max-width: 360px;
+  width: 100%;
+  background: #11182769;
+  color: #ffffff;
 }
 
 .mix-promo a {
@@ -377,6 +380,7 @@
   border-radius: 3px;
   background: #ffffff;
   color: #111827;
+  text-decoration: none;
   font-size: 12px;
   font-weight: 700;
 }

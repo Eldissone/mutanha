@@ -121,6 +121,13 @@ function setupHeroSlider() {
       title: 'Statement Pieces for City Nights',
       ctaLabel: 'View Accessories',
       ctaHref: 'public/acess.html'
+    },
+    {
+      image: 'src/IMG/m.jpg',
+      kicker: 'Mutanha',
+      title: 'Roupas e Acessórios',
+      ctaLabel: 'View Accessories',
+      ctaHref: 'public/roupas.html'
     }
   ];
 
@@ -144,10 +151,14 @@ function setupHeroSlider() {
     activeIndex = (activeIndex + 1) % slides.length;
     renderSlide();
   });
-
   renderSlide();
+  
+  setInterval(() => {
+    activeIndex = (activeIndex + 1) % slides.length;
+    renderSlide();
+  }, 7000)
 }
-
+  
 function setupArrivalsTabs() {
   const tabs = document.querySelectorAll('.mix-tabs button');
   if (!tabs.length) return;
